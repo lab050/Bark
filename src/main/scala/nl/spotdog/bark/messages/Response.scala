@@ -3,8 +3,7 @@ package nl.spotdog.bark.messages
 import nl.spotdog.bark.data_format._
 import BarkTypes._
 
-import akka.util.{ByteIterator, ByteString, ByteStringBuilder}
-
+import akka.util.{ ByteIterator, ByteString, ByteStringBuilder }
 
 trait Response
 
@@ -18,7 +17,7 @@ object Response {
    * 
    * */
   case class Reply(value: ByteString) extends Response
-  
+
   /* 
    * NoReply: Send back to the client in case of a "cast" request
    * 
@@ -26,15 +25,15 @@ object Response {
    * 
    * */
   case class NoReply() extends Response
-  
+
   /* 
    * AsyncReply: Send back to the client with the resulting value through a callback
    * 
    * (`asyncreply, (32), "sum-callback-23")
    * 
    * */
- // case class AsyncReply[T](value: T, callback: String) extends Response
-  
+  // case class AsyncReply[T](value: T, callback: String) extends Response
+
   /* 
    * Error: Send back to the client in case of an error
    * 
@@ -43,14 +42,14 @@ object Response {
    * 
    * */
   case class Error(errorType: Symbol, errorCode: Int, errorClass: String, errorDetail: String, backtrace: List[String]) extends FailedResponse
-  
+
   /* 
    * Error: Send back to the client in case of an error through a callback
    * 
    * ('error, `server, 2, "UnknownFunction", "function 'collect' not found on module 'logs'", [""], "collect-callback-2")
    * 
    * */
- // case class AsyncError(errorType: Symbol, errorCode: Int, errorClass: String, errorDetail: String, backtrace: List[String], callback: String) extends FailedResponse
+  // case class AsyncError(errorType: Symbol, errorCode: Int, errorClass: String, errorDetail: String, backtrace: List[String], callback: String) extends FailedResponse
 }
 
 object BarkResponseConverters extends ETFConverters with TupleConverters {
@@ -76,7 +75,7 @@ object BarkResponseConverters extends ETFConverters with TupleConverters {
       Response.Reply(iter.toByteString)
     }
   }
-  
+
   implicit def noReplyConverter = new ETFConverter[Response.NoReply] {
     def write(o: Response.NoReply) = {
       tuple1Converter[Symbol].write(Tuple1('noreply))

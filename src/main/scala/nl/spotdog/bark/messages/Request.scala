@@ -16,7 +16,7 @@ trait Request {
 }
 
 object Request {
-  
+
   /* 
    * Call: Send a request to a server, waiting for a immediate (blocking) response, best used in CPU bound services. 
    * 
@@ -24,7 +24,7 @@ object Request {
    * 
    */
   case class Call[T <: Product](module: Symbol, functionName: Symbol, arguments: T) extends Request
-  
+
   /* 
    * Cast: Send a request to a server, waiting for a immediate reply but not a response (fire and forget)
    * 
@@ -32,19 +32,19 @@ object Request {
    *   
    */
   case class Cast[T <: Product](module: Symbol, functionName: Symbol, arguments: T) extends Request
-  
+
   /* 
    * AsyncCall: Send a request to a server, waiting for a immediate reply and sending the response later through a callback
    * 
    * (`asyncreply, `persons, `collect, ("group_ids", [1,2,3]), "collect-callback-2")
    *    
    */
- // case class AsyncCall[T <: Product](module: Symbol, functionName: Symbol, arguments: T, callback: String) extends Request
-  
-//  /* 
-//   * React: Send a request to a server, creating a remote iteratee like process. 
-//   */
-//  case class React[Args <: HList](module: Symbol, functionName: Symbol, arguments: Args) extends Request[Args]
+  // case class AsyncCall[T <: Product](module: Symbol, functionName: Symbol, arguments: T, callback: String) extends Request
+
+  //  /* 
+  //   * React: Send a request to a server, creating a remote iteratee like process. 
+  //   */
+  //  case class React[Args <: HList](module: Symbol, functionName: Symbol, arguments: Args) extends Request[Args]
 }
 
 object BarkRequestConverters extends ETFConverters with TupleConverters {
@@ -59,7 +59,7 @@ object BarkRequestConverters extends ETFConverters with TupleConverters {
       Request.Call(tpl._2, tpl._3, tpl._4)
     }
   }
-  
+
   implicit def castConverter[T <: Product](implicit c1: ETFConverter[T]) = new ETFConverter[Request.Cast[T]] {
     def write(o: Request.Cast[T]) = {
       val callTpl = Request.Cast.unapply(o).get

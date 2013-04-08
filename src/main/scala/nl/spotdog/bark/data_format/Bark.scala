@@ -14,7 +14,7 @@ import Tuples._
 object HeaderFunctions {
   def checkMagic(b: Byte) = b match {
     case MAGIC ⇒ ()
-    case _ ⇒ throw new Exception("Bad Magic")
+    case _     ⇒ throw new Exception("Bad Magic")
   }
 
   def checkSignature(expected: Byte, b: Byte) = if (b != expected) throw new Exception("Unexpected signature")
@@ -223,9 +223,9 @@ trait BarkConverters extends ETFConverters with TupleConverters {
     }
 
     def readFromIterator(bi: ByteIterator) = tuple2Converter[Symbol, Symbol].readFromIterator(bi) match {
-      case ('bark, 'true) ⇒ true
+      case ('bark, 'true)  ⇒ true
       case ('bark, 'false) ⇒ false
-      case _ ⇒ throw new Exception("Incorrect boolean")
+      case _               ⇒ throw new Exception("Incorrect boolean")
     }
   }
 

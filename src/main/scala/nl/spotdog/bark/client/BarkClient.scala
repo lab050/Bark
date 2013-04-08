@@ -41,14 +41,13 @@ class BarkClientFunction(client: BarkClient, module: Symbol, functionName: Symbo
     val cmd = BarkRequestConverters.callConverter.write(req)
     (client sendCommand cmd).map(BarkClientResult(_))
   }
-  
+
   def cast[T <: Product](args: T)(implicit tW: ETFConverter[T]) = {
     val req = Request.Cast(module, functionName, args)
     val cmd = BarkRequestConverters.castConverter.write(req)
     (client sendCommand cmd).map(BarkClientResult(_))
   }
 
-  
   def <<?[T <: Product](args: T)(implicit tW: ETFConverter[T]) = call(args)
   def <<![T <: Product](args: T)(implicit tW: ETFConverter[T]) = cast(args)
 }
@@ -62,7 +61,7 @@ class BarkClient(host: String, port: Int, numberOfWorkers: Int, description: Str
     def byteOrder = java.nio.ByteOrder.BIG_ENDIAN
   }
 
-  val stages = new LengthFieldFrame(1024*1024*50) // Max 50MB messages 
+  val stages = new LengthFieldFrame(1024 * 1024 * 50) // Max 50MB messages 
 
   val actor = SentinelClient.randomRouting(host, port, numberOfWorkers, description)(ctx, stages, true)
 

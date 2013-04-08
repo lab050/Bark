@@ -63,7 +63,7 @@ object ApplicationBuild extends Build {
     settings = Project.defaultSettings ++ Seq(
       libraryDependencies ++= appDependencies,
       mainClass := Some("Main")
-    ) ++ spray.boilerplate.BoilerplatePlugin.Boilerplate.settings
+    ) ++ spray.boilerplate.BoilerplatePlugin.Boilerplate.settings ++ Format.settings
   )
 }
 
@@ -80,8 +80,6 @@ object Format {
     FormattingPreferences().
       setPreference(AlignParameters, true).
       setPreference(AlignSingleLineCaseStatements, true).
-      setPreference(CompactControlReadability, true).
-      setPreference(CompactStringConcatenation, true).
       setPreference(DoubleIndentClassDeclaration, true).
       setPreference(IndentLocalDefs, true).
       setPreference(IndentPackageBlocks, true).

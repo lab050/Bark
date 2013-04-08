@@ -10,7 +10,7 @@ case class LargeTuple(elements: Seq[Any]) extends Product {
   override def canEqual(other: Any): Boolean = {
     other match {
       case o: LargeTuple ⇒ o.elements == elements
-      case _ ⇒ false
+      case _             ⇒ false
     }
   }
 
