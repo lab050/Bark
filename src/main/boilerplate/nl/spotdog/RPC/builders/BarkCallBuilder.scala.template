@@ -1,0 +1,28 @@
+// package nl.spotdog.bark.server.builders
+
+// import akka.util.ByteString
+
+// import nl.spotdog.bark.data_protocol._
+// import nl.spotdog.bark.data_protocol.Bark._
+// import scala.concurrent.Future
+// import scala.concurrent.ExecutionContext.Implicits.global
+// import nl.spotdog.bark.server._
+
+// import scalaz._
+// import Scalaz._
+
+// import scala.util.Try
+
+// trait BarkCallBuilder {
+//   def name: Symbol
+
+//   def apply[R](f: Function##0[R])(implicit writer: ETFWriter[R]) =
+//     BarkServerFunction.call(name)((bs: ByteString) ⇒ Try(writer.write(f())))
+
+//   [#def apply[[#T1#], R](f: Function1[[#T1#], R])(implicit reader: ETFReader[Tuple1[[#T1#]]], writer: ETFWriter[R]) = 
+// 		BarkServerFunction.call(name)((bs: ByteString) ⇒ Try(fromBark[Tuple1[[#T1#]]](bs).getOrElse(throw new Exception("Couldn't process arguments"))) flatMap {x ⇒ 
+// 				Try(writer.write(f([#x._1#])))
+// 		}) 
+// 	#
+// 	]
+// }
