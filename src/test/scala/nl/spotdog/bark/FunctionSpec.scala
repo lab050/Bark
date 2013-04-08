@@ -2,7 +2,7 @@ package nl.spotdog.bark
 
 import org.specs2.mutable.Specification
 
-import nl.spotdog.bark.data_format.Bark._
+import nl.spotdog.bark.protocol.ETF._
 import akka.actor.IO.Chunk
 import java.util.Date
 import play.api.libs.iteratee.Enumerator
@@ -34,9 +34,9 @@ class FunctionSpec extends Specification {
       val call = callBuilder((name: String) ⇒ name.length)
       val a = Tuple1("Gideon")
 
-   //   val ra = call.iteratee(Chunk(toBark(a)))._1.get
+      //   val ra = call.iteratee(Chunk(toETF(a)))._1.get
 
-    //  ra == a._1.length
+      //  ra == a._1.length
     }
   }
 
@@ -54,8 +54,8 @@ class FunctionSpec extends Specification {
       val cast = castBuilder((name: String) ⇒ println("WORKS!"))
       val a = Tuple1("Gideon")
 
- //     val ra = cast.iteratee(Chunk(toBark(a)))._1.get
-//      true
+      //     val ra = cast.iteratee(Chunk(toETF(a)))._1.get
+      //      true
     }
   }
 

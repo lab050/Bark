@@ -18,7 +18,7 @@ case class BarkServerModules(modules: Map[Symbol, BarkServerModule]) {
 case class BarkServerFunctionHolder(calls: Map[Symbol, BarkServerCall], casts: Map[Symbol, BarkServerCast])
 
 object BarkServerModule {
-  implicit def barkModuleToBarkModules(m: BarkServerModule): BarkServerModules = BarkServerModules(Map(m.name -> m))
+  implicit def barkModuletoETFModules(m: BarkServerModule): BarkServerModules = BarkServerModules(Map(m.name -> m))
 
   def module[T <: HList: <<:[BarkServerFunction]#λ, A <: HList, B <: HList](n: Symbol)(fs: BarkServerFunctions[T])(implicit callFilter: FilterAux[T, BarkServerCall, A],
                                                                                                                    castFilter: FilterAux[T, BarkServerCast, B],
@@ -32,17 +32,4 @@ object BarkServerModule {
         BarkServerFunctionHolder(calls.toList.map(x ⇒ x.name -> x).toMap, casts.toList.map(x ⇒ x.name -> x).toMap)
       }
     }
-}
-
-object Test extends BarkRouting {
-  import BarkServerModule._
-  import nl.spotdog.bark.data_format._
-  import Bark._
-
-  val a = module('persons) {
-    call('test)((a: Int, b: Int) ⇒ a + b) ~
-      cast('blaat)((s: String) ⇒ s.length)
-  } ~ module('other) {
-    cast('yes)(() ⇒ "NO")
-  }
 }

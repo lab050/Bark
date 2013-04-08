@@ -1,4 +1,4 @@
-package nl.spotdog.bark.data_format
+package nl.spotdog.bark.protocol
 
 import akka.util.ByteString
 
@@ -17,7 +17,7 @@ case class LargeTuple(elements: Seq[Any]) extends Product {
   override def equals(other: Any) = canEqual(other)
 }
 
-object BarkTypes {
+object ETFTypes {
   val SMALL_INT: Byte = 97
   val INT: Byte = 98
   val SMALL_BIGNUM: Byte = 110

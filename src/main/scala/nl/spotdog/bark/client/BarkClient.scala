@@ -10,9 +10,14 @@ import scalaz._
 import Scalaz._
 import effect._
 
+import scala.util.Try
+
 import akka.io._
-import nl.spotdog.bark.data_format._
-import nl.spotdog.bark.messages._
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import nl.spotdog.bark.protocol._
+import nl.spotdog.bark.protocol.BarkMessaging._
 
 import nl.gideondk.sentinel._
 import client._
@@ -32,20 +37,36 @@ object BarkClientConfig {
 }
 
 case class BarkClientResult(rawResult: ByteString) {
-  def as[T](implicit reader: ETFReader[T]) = Bark.fromBark[T](rawResult)
+  def as[T](implicit reader: ETFReader[T]) = ETF.fromETF[T](rawResult)
 }
 
 class BarkClientFunction(client: BarkClient, module: Symbol, functionName: Symbol) {
   def call[T <: Product](args: T)(implicit tW: ETFConverter[T]) = {
     val req = Request.Call(module, functionName, args)
-    val cmd = BarkRequestConverters.callConverter.write(req)
-    (client sendCommand cmd).map(BarkClientResult(_))
+    val cmd = callConverter(tW).write(req)
+    (client sendCommand cmd).flatMap { x ⇒
+      Try(replyConverter.read(x)) match {
+        case scala.util.Success(s) ⇒ s.point[ValidatedFutureIO].map(x ⇒ BarkClientResult(x.value))
+        case scala.util.Failure(e) ⇒ {
+          val error = errorConverter.read(x)
+          ValidatedFutureIO(Future(throw new Exception(error.errorDetail))) // TODO: handle specific errors into specific throwables
+        }
+      }
+    }
   }
 
   def cast[T <: Product](args: T)(implicit tW: ETFConverter[T]) = {
     val req = Request.Cast(module, functionName, args)
-    val cmd = BarkRequestConverters.castConverter.write(req)
-    (client sendCommand cmd).map(BarkClientResult(_))
+    val cmd = castConverter(tW).write(req)
+    (client sendCommand cmd).flatMap { x ⇒
+      Try(replyConverter.read(x)) match {
+        case scala.util.Success(s) ⇒ s.point[ValidatedFutureIO].map(_ ⇒ ())
+        case scala.util.Failure(e) ⇒ {
+          val error = errorConverter.read(x)
+          ValidatedFutureIO(Future(throw new Exception(error.errorDetail))) // TODO: handle specific errors into specific throwables
+        }
+      }
+    }
   }
 
   def <<?[T <: Product](args: T)(implicit tW: ETFConverter[T]) = call(args)
@@ -74,4 +95,10 @@ class BarkClient(host: String, port: Int, numberOfWorkers: Int, description: Str
   def module(moduleName: Symbol) = new BarkClientModule(this, moduleName)
 
   def |?|(moduleName: Symbol) = module(moduleName)
+}
+
+object BarkClient {
+  def apply(host: String, port: Int, numberOfWorkers: Int, description: String)(implicit system: ActorSystem) =
+    new BarkClient(host, port, numberOfWorkers, description)
+
 }

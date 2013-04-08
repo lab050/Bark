@@ -17,8 +17,8 @@ case class BarkServerFunctions[T <: HList](functions: T) {
 }
 
 private object BarkServerFunction {
-  implicit def barkCallFunctionToBarkFunctions(m: BarkServerCall): BarkServerFunctions[BarkServerCall :: HNil] = BarkServerFunctions(m :: HNil)
-  implicit def barkCastFunctionToBarkFunctions(m: BarkServerCast): BarkServerFunctions[BarkServerCast :: HNil] = BarkServerFunctions(m :: HNil)
+  implicit def barkCallFunctiontoETFFunctions(m: BarkServerCall): BarkServerFunctions[BarkServerCall :: HNil] = BarkServerFunctions(m :: HNil)
+  implicit def barkCastFunctiontoETFFunctions(m: BarkServerCast): BarkServerFunctions[BarkServerCast :: HNil] = BarkServerFunctions(m :: HNil)
 
   def call(n: Symbol)(f: ByteString ⇒ Try[ByteString]) = BarkServerCall(n, f)
 

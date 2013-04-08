@@ -1,9 +1,9 @@
-package nl.spotdog.bark.data_format
+package nl.spotdog.bark.protocol
 
 import akka.util.{ ByteStringBuilder, ByteString, ByteIterator }
 
 import akka.actor.IO._
-import BarkTypes._
+import ETFTypes._
 
 trait ETFWriter[T] {
   def write(o: T): ByteString

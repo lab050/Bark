@@ -2,8 +2,9 @@ package nl.spotdog.bark.server
 
 import akka.actor.{ Props, ActorSystem }
 
-import nl.spotdog.bark.messages._
-import nl.spotdog.bark.data_format._
+import nl.spotdog.bark.protocol._
+import BarkMessaging._
+
 import akka.util._
 
 import akka.actor.ActorRef
@@ -15,20 +16,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scalaz._
 import Scalaz._
 
-import nl.spotdog.bark.messages.BarkRequestConverters._
-import nl.spotdog.bark.messages.BarkResponseConverters._
-import nl.spotdog.bark.data_format.Bark._
-import nl.spotdog.bark.data_format._
+import nl.spotdog.bark.protocol._
+import ETF._
 
-trait BarkRouter extends ETFConverters {
+class BarkRouter(modules: BarkServerModules) {
+  import ETF._
   type BarkServerValidation[T] = Validation[Response.Error, T]
-
-  def modules: BarkServerModules
 
   def checkHeader(iter: ByteIterator): BarkServerValidation[Unit] = {
     try {
       HeaderFunctions.checkMagic(iter.getByte)
-      HeaderFunctions.checkSignature(BarkTypes.SMALL_TUPLE, iter.getByte)
+      HeaderFunctions.checkSignature(ETFTypes.SMALL_TUPLE, iter.getByte)
       Success(())
     } catch {
       case e: Throwable ⇒ Failure(Response.Error('protocol, 1, "ParseError", e.getMessage, List[String]()))

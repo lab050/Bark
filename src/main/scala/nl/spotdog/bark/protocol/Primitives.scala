@@ -1,7 +1,7 @@
-package nl.spotdog.bark.data_format
+package nl.spotdog.bark.protocol
 
 import akka.util.{ ByteStringBuilder, ByteString, ByteIterator }
-import BarkTypes._
+import ETFTypes._
 
 import java.util.Date
 
@@ -28,14 +28,14 @@ trait ETFConverters {
   implicit object IntConverter extends ETFConverter[Int] {
     def write(o: Int) = {
       val builder = new ByteStringBuilder
-      builder.putByte(BarkTypes.MAGIC)
-      builder.putByte(BarkTypes.INT)
+      builder.putByte(ETFTypes.MAGIC)
+      builder.putByte(ETFTypes.INT)
       builder.putInt(o).result
     }
 
     def readFromIterator(iter: ByteIterator): Int = {
       checkMagic(iter.getByte)
-      checkSignature(BarkTypes.INT, iter.getByte)
+      checkSignature(ETFTypes.INT, iter.getByte)
       iter.getInt(byteOrder)
     }
   }
@@ -43,11 +43,11 @@ trait ETFConverters {
   implicit object DoubleConverter extends ETFConverter[Double] {
     def write(o: Double) = {
       val bytes = String.format("%15.15e", new java.lang.Double(o)).getBytes
-      val padded = bytes ++ Stream.continually(0.toByte).take(BarkTypes.FLOAT_LENGTH - bytes.length)
+      val padded = bytes ++ Stream.continually(0.toByte).take(ETFTypes.FLOAT_LENGTH - bytes.length)
 
       val builder = new ByteStringBuilder
-      builder.putByte(BarkTypes.MAGIC)
-      builder.putByte(BarkTypes.FLOAT)
+      builder.putByte(ETFTypes.MAGIC)
+      builder.putByte(ETFTypes.FLOAT)
       builder.putBytes(padded)
 
       builder.result
@@ -55,23 +55,23 @@ trait ETFConverters {
 
     def readFromIterator(iter: ByteIterator): Double = {
       checkMagic(iter.getByte)
-      checkSignature(BarkTypes.FLOAT, iter.getByte)
-      new java.lang.Double(new String(iter.take(BarkTypes.FLOAT_LENGTH).toArray)).doubleValue
+      checkSignature(ETFTypes.FLOAT, iter.getByte)
+      new java.lang.Double(new String(iter.take(ETFTypes.FLOAT_LENGTH).toArray)).doubleValue
     }
   }
 
   implicit object ByteConverter extends ETFConverter[Byte] {
     def write(o: Byte) = {
       val builder = new ByteStringBuilder
-      builder.putByte(BarkTypes.MAGIC)
-      builder.putByte(BarkTypes.SMALL_INT)
+      builder.putByte(ETFTypes.MAGIC)
+      builder.putByte(ETFTypes.SMALL_INT)
       builder.putByte(o)
       builder.result
     }
 
     def readFromIterator(iter: ByteIterator): Byte = {
       checkMagic(iter.getByte)
-      checkSignature(BarkTypes.SMALL_INT, iter.getByte)
+      checkSignature(ETFTypes.SMALL_INT, iter.getByte)
       iter.getByte
     }
   }
@@ -83,13 +83,13 @@ trait ETFConverters {
       val length = bytes.length
 
       val builder = new ByteStringBuilder
-      builder.putByte(BarkTypes.MAGIC)
+      builder.putByte(ETFTypes.MAGIC)
 
       if (length < 255) {
-        builder.putByte(BarkTypes.SMALL_BIGNUM)
+        builder.putByte(ETFTypes.SMALL_BIGNUM)
         builder.putByte(length.toByte)
       } else {
-        builder.putByte(BarkTypes.LARGE_BIGNUM)
+        builder.putByte(ETFTypes.LARGE_BIGNUM)
         builder.putInt(length)
       }
 
@@ -126,8 +126,8 @@ trait ETFConverters {
   implicit object StringConverter extends ETFConverter[String] {
     def write(o: String) = {
       val builder = new ByteStringBuilder
-      builder.putByte(BarkTypes.MAGIC)
-      builder.putByte(BarkTypes.STRING)
+      builder.putByte(ETFTypes.MAGIC)
+      builder.putByte(ETFTypes.STRING)
       builder.putShort(o.length)
       builder.putBytes(o.getBytes)
       builder.result
@@ -135,7 +135,7 @@ trait ETFConverters {
 
     def readFromIterator(iter: ByteIterator): String = {
       checkMagic(iter.getByte)
-      checkSignature(BarkTypes.STRING, iter.getByte)
+      checkSignature(ETFTypes.STRING, iter.getByte)
       val size = iter.getShort(byteOrder)
 
       val arr = new Array[Byte](size)
@@ -148,8 +148,8 @@ trait ETFConverters {
   implicit object ByteArrayConverter extends ETFConverter[Array[Byte]] {
     def write(o: Array[Byte]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(BarkTypes.MAGIC)
-      builder.putByte(BarkTypes.BIN)
+      builder.putByte(ETFTypes.MAGIC)
+      builder.putByte(ETFTypes.BIN)
       builder.putInt(o.length)
       builder.putBytes(o)
       builder.result
@@ -157,7 +157,7 @@ trait ETFConverters {
 
     def readFromIterator(iter: ByteIterator): Array[Byte] = {
       checkMagic(iter.getByte)
-      checkSignature(BarkTypes.BIN, iter.getByte)
+      checkSignature(ETFTypes.BIN, iter.getByte)
       val size = iter.getInt(byteOrder)
 
       val arr = new Array[Byte](size)
@@ -169,8 +169,8 @@ trait ETFConverters {
   implicit object SymbolConverter extends ETFConverter[Symbol] {
     def write(o: Symbol) = {
       val builder = new ByteStringBuilder
-      builder.putByte(BarkTypes.MAGIC)
-      builder.putByte(BarkTypes.ATOM)
+      builder.putByte(ETFTypes.MAGIC)
+      builder.putByte(ETFTypes.ATOM)
       builder.putShort(o.name.length)
       builder.putBytes(o.name.getBytes)
       builder.result
@@ -178,7 +178,7 @@ trait ETFConverters {
 
     def readFromIterator(iter: ByteIterator): Symbol = {
       checkMagic(iter.getByte)
-      checkSignature(BarkTypes.ATOM, iter.getByte)
+      checkSignature(ETFTypes.ATOM, iter.getByte)
       val size = iter.getShort(byteOrder)
 
       val arr = new Array[Byte](size)
@@ -190,20 +190,20 @@ trait ETFConverters {
   implicit def ListConverter[T](implicit aConv: ETFConverter[T]) = new ETFConverter[List[T]] {
     def write(o: List[T]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(BarkTypes.MAGIC)
-      builder.putByte(BarkTypes.LIST)
+      builder.putByte(ETFTypes.MAGIC)
+      builder.putByte(ETFTypes.LIST)
       builder.putInt(o.length)
       o.foreach {
         x ⇒
           builder ++= aConv.write(x)
       }
-      builder.putByte(BarkTypes.ZERO)
+      builder.putByte(ETFTypes.ZERO)
       builder.result
     }
 
     def readFromIterator(iter: ByteIterator): List[T] = {
       checkMagic(iter.getByte)
-      checkSignature(BarkTypes.LIST, iter.getByte)
+      checkSignature(ETFTypes.LIST, iter.getByte)
       val size = iter.getInt(byteOrder)
       val l = for (i ← 1 to size) yield aConv.readFromIterator(iter)
       iter.getByte
@@ -212,7 +212,7 @@ trait ETFConverters {
   }
 }
 
-trait BarkConverters extends ETFConverters with TupleConverters {
+trait ExtendedETFConverters extends ETFConverters with TupleConverters {
 
   implicit object BooleanConverter extends BarkConverter[Boolean] {
     def write(o: Boolean) = {
@@ -264,8 +264,8 @@ trait BarkConverters extends ETFConverters with TupleConverters {
   }
 }
 
-object Bark extends BarkConverters {
-  def toBark[T](o: T)(implicit writer: ETFWriter[T]): ByteString = writer.write(o)
+object ETF extends ExtendedETFConverters {
+  def toETF[T](o: T)(implicit writer: ETFWriter[T]): ByteString = writer.write(o)
 
-  def fromBark[T](o: ByteString)(implicit reader: ETFReader[T]): Option[T] = Try(reader.read(o)).toOption
+  def fromETF[T](o: ByteString)(implicit reader: ETFReader[T]): Option[T] = Try(reader.read(o)).toOption
 }

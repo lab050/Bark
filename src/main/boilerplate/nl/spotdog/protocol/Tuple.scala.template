@@ -1,4 +1,4 @@
-// package nl.spotdog.bark.serialization
+// package nl.spotdog.bark.protocol
 
 // import akka.util.{ ByteStringBuilder, ByteString }
 // import akka.actor._

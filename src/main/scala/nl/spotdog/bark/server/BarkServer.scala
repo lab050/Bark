@@ -5,7 +5,7 @@ import nl.spotdog.bark.actors._
 import akka.actor.ActorRef
 import nl.gideondk.sentinel.server._
 import builders._
-import nl.spotdog.bark.messages.HasByteOrder
+import nl.spotdog.bark.protocol.BarkMessaging._
 import akka.io.LengthFieldFrame
 
 class BarkServer(numberOfWorkers: Int, description: String)(router: BarkRouter)(implicit system: ActorSystem) {
@@ -27,7 +27,7 @@ class BarkServer(numberOfWorkers: Int, description: String)(router: BarkRouter)(
 }
 
 object BarkServer {
-  def apply(numberOfWorkers: Int, description: String)(router: BarkRouter)(implicit system: ActorSystem) {
+  def apply(numberOfWorkers: Int, description: String)(router: BarkRouter)(implicit system: ActorSystem) = {
     new BarkServer(numberOfWorkers, description)(router)
   }
 }

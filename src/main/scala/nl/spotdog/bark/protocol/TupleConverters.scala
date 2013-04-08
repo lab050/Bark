@@ -1,10 +1,10 @@
-package nl.spotdog.bark.data_format
+package nl.spotdog.bark.protocol
 
 import akka.util.{ ByteStringBuilder, ByteString, ByteIterator }
 import akka.actor._
 
 import HeaderFunctions._
-import BarkTypes._
+import ETFTypes._
 
 trait TupleConverters {
   implicit def tuple1Converter[T1](implicit c1: ETFConverter[T1]) = new ETFConverter[Tuple1[T1]] {

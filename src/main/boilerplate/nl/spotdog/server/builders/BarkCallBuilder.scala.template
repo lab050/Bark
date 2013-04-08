@@ -2,8 +2,8 @@
 
 // import akka.util.ByteString
 
-// import nl.spotdog.bark.data_protocol._
-// import nl.spotdog.bark.data_protocol.Bark._
+// import nl.spotdog.bark.protocol._
+// import nl.spotdog.bark.protocol.ETF._
 // import scala.concurrent.Future
 // import scala.concurrent.ExecutionContext.Implicits.global
 // import nl.spotdog.bark.server._
@@ -20,7 +20,7 @@
 //     BarkServerFunction.call(name)((bs: ByteString) ⇒ Try(writer.write(f())))
 
 //   [#def apply[[#T1#], R](f: Function1[[#T1#], R])(implicit reader: ETFReader[Tuple1[[#T1#]]], writer: ETFWriter[R]) = 
-// 		BarkServerFunction.call(name)((bs: ByteString) ⇒ Try(fromBark[Tuple1[[#T1#]]](bs).getOrElse(throw new Exception("Couldn't process arguments"))) flatMap {x ⇒ 
+// 		BarkServerFunction.call(name)((bs: ByteString) ⇒ Try(fromETF[Tuple1[[#T1#]]](bs).getOrElse(throw new Exception("Couldn't process arguments"))) flatMap {x ⇒ 
 // 				Try(writer.write(f([#x._1#])))
 // 		}) 
 // 	#
