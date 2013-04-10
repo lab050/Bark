@@ -11,6 +11,8 @@ import shapeless._
 import HList._
 import Tuples._
 
+case class Atom(v: String)
+
 object HeaderFunctions {
   def checkMagic(b: Byte) = b match {
     case MAGIC ⇒ ()
@@ -163,6 +165,27 @@ trait ETFConverters {
       val arr = new Array[Byte](size)
       for (i ← 0 to size - 1) arr(i) = iter.next
       arr
+    }
+  }
+
+  implicit object AtomConverter extends ETFConverter[Atom] {
+    def write(o: Atom) = {
+      val builder = new ByteStringBuilder
+      builder.putByte(ETFTypes.MAGIC)
+      builder.putByte(ETFTypes.ATOM)
+      builder.putShort(o.v.length)
+      builder.putBytes(o.v.getBytes)
+      builder.result
+    }
+
+    def readFromIterator(iter: ByteIterator): Atom = {
+      checkMagic(iter.getByte)
+      checkSignature(ETFTypes.ATOM, iter.getByte)
+      val size = iter.getShort(byteOrder)
+
+      val arr = new Array[Byte](size)
+      for (i ← 0 to size - 1) arr(i) = iter.next
+      Atom(new String(arr))
     }
   }
 

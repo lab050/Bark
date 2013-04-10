@@ -22,6 +22,9 @@ import nl.spotdog.bark.protocol.BarkMessaging._
 import nl.gideondk.sentinel._
 import client._
 
+import shapeless._
+import TypeOperators._
+
 trait BarkClientConfig {
   def host: String
   def port: Int
@@ -40,9 +43,12 @@ case class BarkClientResult(rawResult: ByteString) {
   def as[T](implicit reader: ETFReader[T]) = ETF.fromETF[T](rawResult)
 }
 
-class BarkClientFunction(client: BarkClient, module: Symbol, functionName: Symbol) {
-  def call[T <: Product](args: T)(implicit tW: ETFConverter[T]) = {
-    val req = Request.Call(module, functionName, args)
+class BarkClientFunction(client: BarkClient, module: String, functionName: String) {
+  def call[T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[T]): ValidatedFutureIO[BarkClientResult] =
+    call(Tuple1(args))
+
+  def call[T <: Product](args: T)(implicit tW: ETFConverter[T]): ValidatedFutureIO[BarkClientResult] = {
+    val req = Request.Call(Atom(module), Atom(functionName), args)
     val cmd = callConverter(tW).write(req)
     (client sendCommand cmd).flatMap { x ⇒
       Try(replyConverter.read(x)) match {
@@ -55,8 +61,11 @@ class BarkClientFunction(client: BarkClient, module: Symbol, functionName: Symbo
     }
   }
 
-  def cast[T <: Product](args: T)(implicit tW: ETFConverter[T]) = {
-    val req = Request.Cast(module, functionName, args)
+  def cast[T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[T]): ValidatedFutureIO[Unit] =
+    cast(Tuple1(args))
+
+  def cast[T <: Product](args: T)(implicit tW: ETFConverter[T]): ValidatedFutureIO[Unit] = {
+    val req = Request.Cast(Atom(module), Atom(functionName), args)
     val cmd = castConverter(tW).write(req)
     (client sendCommand cmd).flatMap { x ⇒
       Try(replyConverter.read(x)) match {
@@ -69,12 +78,17 @@ class BarkClientFunction(client: BarkClient, module: Symbol, functionName: Symbo
     }
   }
 
-  def <<?[T <: Product](args: T)(implicit tW: ETFConverter[T]) = call(args)
-  def <<![T <: Product](args: T)(implicit tW: ETFConverter[T]) = cast(args)
+  def <<?[T <: Product](args: T)(implicit tW: ETFConverter[T]): ValidatedFutureIO[BarkClientResult] = call(args)
+
+  def <<?[T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[T]): ValidatedFutureIO[BarkClientResult] = call(args)
+
+  def <<![T <: Product](args: T)(implicit tW: ETFConverter[T]): ValidatedFutureIO[Unit] = cast(args)
+
+  def <<![T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[T]): ValidatedFutureIO[Unit] = cast(args)
 }
 
-class BarkClientModule(client: BarkClient, name: Symbol) {
-  def |/|(functionName: Symbol) = new BarkClientFunction(client, name, functionName)
+class BarkClientModule(client: BarkClient, name: String) {
+  def |/|(functionName: String) = new BarkClientFunction(client, name, functionName)
 }
 
 class BarkClient(host: String, port: Int, numberOfWorkers: Int, description: String)(implicit system: ActorSystem) {
@@ -92,9 +106,9 @@ class BarkClient(host: String, port: Int, numberOfWorkers: Int, description: Str
 
   def sendCommand(cmd: ByteString) = actor <~< cmd
 
-  def module(moduleName: Symbol) = new BarkClientModule(this, moduleName)
+  def module(moduleName: String) = new BarkClientModule(this, moduleName)
 
-  def |?|(moduleName: Symbol) = module(moduleName)
+  def |?|(moduleName: String) = module(moduleName)
 }
 
 object BarkClient {

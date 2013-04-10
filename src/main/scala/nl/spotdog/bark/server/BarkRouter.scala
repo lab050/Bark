@@ -8,8 +8,7 @@ import BarkMessaging._
 import akka.util._
 
 import akka.actor.ActorRef
-import builders._
-import scala.util.Try
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -19,8 +18,15 @@ import Scalaz._
 import nl.spotdog.bark.protocol._
 import ETF._
 
+import scala.util.Try
+
+import shapeless._
+import Functions._
+import Tuples._
+
 class BarkRouter(modules: BarkServerModules) {
   import ETF._
+
   type BarkServerValidation[T] = Validation[Response.Error, T]
 
   def checkHeader(iter: ByteIterator): BarkServerValidation[Unit] = {
@@ -29,42 +35,42 @@ class BarkRouter(modules: BarkServerModules) {
       HeaderFunctions.checkSignature(ETFTypes.SMALL_TUPLE, iter.getByte)
       Success(())
     } catch {
-      case e: Throwable ⇒ Failure(Response.Error('protocol, 1, "ParseError", e.getMessage, List[String]()))
+      case e: Throwable ⇒ Failure(Response.Error(Atom("protocol"), 1, "ParseError", e.getMessage, List[String]()))
     }
   }
 
-  def getSizeTypeModuleAndFunction(iter: ByteIterator): BarkServerValidation[(Int, Symbol, Symbol, Symbol)] = {
+  def getSizeTypeModuleAndFunction(iter: ByteIterator): BarkServerValidation[(Int, Atom, Atom, Atom)] = {
     val size = iter.getByte
-    if (size != 4) Failure(Response.Error('protocol, 1, "ParseError", "Incorrect request message", List[String]()))
+    if (size != 4) Failure(Response.Error(Atom("protocol"), 1, "ParseError", "Incorrect request message", List[String]()))
     else {
       val tpl = for {
-        callType ← Try(SymbolConverter.readFromIterator(iter))
-        module ← Try(SymbolConverter.readFromIterator(iter))
-        function ← Try(SymbolConverter.readFromIterator(iter))
+        callType ← Try(AtomConverter.readFromIterator(iter))
+        module ← Try(AtomConverter.readFromIterator(iter))
+        function ← Try(AtomConverter.readFromIterator(iter))
       } yield (size.toInt, callType, module, function)
 
       tpl match {
         case scala.util.Success(s) ⇒ Success(s)
-        case scala.util.Failure(f) ⇒ Failure(Response.Error('protocol, 1, "ParseError", "Incorrect request message", List[String](f.getMessage)))
+        case scala.util.Failure(f) ⇒ Failure(Response.Error(Atom("protocol"), 1, "ParseError", "Incorrect request message", List[String](f.getMessage)))
       }
     }
   }
 
-  def handleCall(module: Symbol, functionName: Symbol, arguments: ByteString) = for {
-    module ← modules.modules.get(module).toSuccess(Response.Error('server, 1, "ModuleError", "Unknown module", List[String]()))
-    function ← module.funcs.calls.get(functionName).toSuccess(Response.Error('server, 2, "FunctionError", "Unknown function", List[String]()))
+  def handleCall(module: Atom, functionName: Atom, arguments: ByteString) = for {
+    module ← modules.modules.get(module).toSuccess(Response.Error(Atom("server"), 1, "ModuleError", "Unknown module", List[String]()))
+    function ← module.funcs.calls.get(functionName).toSuccess(Response.Error(Atom("server"), 2, "FunctionError", "Unknown function", List[String]()))
     res ← function.function(arguments) match {
       case scala.util.Success(s) ⇒ Success(Future(replyConverter.write(Response.Reply(s))))
-      case scala.util.Failure(e) ⇒ Failure(Response.Error('server, 0, "RuntimeError", e.getMessage, List[String]())) // Should extend the stacktrace into the error
+      case scala.util.Failure(e) ⇒ Failure(Response.Error(Atom("server"), 0, "RuntimeError", e.getMessage, List[String]())) // Should extend the stacktrace into the error
     }
   } yield res
 
-  def handleCast(module: Symbol, functionName: Symbol, arguments: ByteString) = for {
-    module ← modules.modules.get(module).toSuccess(Response.Error('server, 1, "ModuleError", "Unknown module", List[String]()))
-    function ← module.funcs.casts.get(functionName).toSuccess(Response.Error('server, 2, "FunctionError", "Unknown function", List[String]()))
+  def handleCast(module: Atom, functionName: Atom, arguments: ByteString) = for {
+    module ← modules.modules.get(module).toSuccess(Response.Error(Atom("server"), 1, "ModuleError", "Unknown module", List[String]()))
+    function ← module.funcs.casts.get(functionName).toSuccess(Response.Error(Atom("server"), 2, "FunctionError", "Unknown function", List[String]()))
     res ← function.function(arguments) match {
       case scala.util.Success(s) ⇒ Success(Future(noReplyConverter.write(Response.NoReply())))
-      case scala.util.Failure(e) ⇒ Failure(Response.Error('server, 0, "RuntimeError", e.getMessage, List[String]())) // Should extend the stacktrace into the error
+      case scala.util.Failure(e) ⇒ Failure(Response.Error(Atom("server"), 0, "RuntimeError", e.getMessage, List[String]())) // Should extend the stacktrace into the error
     }
   } yield res
 
@@ -77,8 +83,8 @@ class BarkRouter(modules: BarkServerModules) {
       (size, callType, module, function) = tpl
       payload = iter.toByteString
       res ← callType match {
-        case 'call ⇒ handleCall(module, function, payload)
-        case 'cast ⇒ handleCast(module, function, payload)
+        case Atom("call") ⇒ handleCall(module, function, payload)
+        case Atom("cast") ⇒ handleCast(module, function, payload)
       }
     } yield res
 
@@ -89,12 +95,28 @@ class BarkRouter(modules: BarkServerModules) {
   }
 }
 
+trait BarkCallBuilder {
+  def name: Atom
+
+  def apply[F, R, A <: HList, P <: Product](f: F)(implicit h: FnHListerAux[F, A ⇒ R], tplr: TuplerAux[A, P],
+                                                  hl: HListerAux[P, A], reader: ETFReader[P], writer: ETFWriter[R]) =
+    BarkServerFunction.call(name)((args: ByteString) ⇒ Try(writer.write(f.hlisted(reader.read(args).hlisted))))
+}
+
+trait BarkCastBuilder {
+  def name: Atom
+
+  def apply[F, A <: HList, P <: Product](f: F)(implicit h: FnHListerAux[F, A ⇒ Unit], tplr: TuplerAux[A, P],
+                                               hl: HListerAux[P, A], reader: ETFReader[P]) =
+    BarkServerFunction.cast(name)((args: ByteString) ⇒ Try(f.hlisted(reader.read(args).hlisted)))
+}
+
 trait BarkRouting {
-  def call(n: Symbol) = new BarkCallBuilder {
-    val name = n
+  def call(n: String) = new BarkCallBuilder {
+    val name = Atom(n)
   }
 
-  def cast(n: Symbol) = new BarkCastBuilder {
-    val name = n
+  def cast(n: String) = new BarkCastBuilder {
+    val name = Atom(n)
   }
 }

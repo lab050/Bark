@@ -4,7 +4,7 @@ import akka.actor.{ Props, ActorSystem }
 import nl.spotdog.bark.actors._
 import akka.actor.ActorRef
 import nl.gideondk.sentinel.server._
-import builders._
+
 import nl.spotdog.bark.protocol.BarkMessaging._
 import akka.io.LengthFieldFrame
 
@@ -22,7 +22,7 @@ class BarkServer(numberOfWorkers: Int, description: String)(router: BarkRouter)(
   }
 
   def run(port: Int) = {
-    val actor = SentinelServer.randomRouting(9999, 16, router.handle, description)(ctx, stages, true)
+    val actor = SentinelServer.randomRouting(port, numberOfWorkers, router.handle, description)(ctx, stages, true)
   }
 }
 
