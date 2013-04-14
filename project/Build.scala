@@ -39,7 +39,8 @@ object ApplicationBuild extends Build {
           key(":SpaceInsideBrackets"), false,
           key("SpacesWithinPatternBinders"), true
         )
-      )
+      ),
+      publishTo := Some(Resolver.file("file", new File("/Users/gideondk/Development/gideondk-mvn-repo")))
     )
 
   val appDependencies = Seq(

@@ -2,7 +2,6 @@ package nl.spotdog.bark.client
 
 import akka.actor.{ Props, ActorSystem }
 
-import nl.spotdog.bark.actors._
 import akka.actor.ActorRef
 import akka.util.ByteString
 import concurrent.Promise

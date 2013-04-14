@@ -35,7 +35,16 @@ You can install Bark through source (by publishing it into your local Ivy reposi
 ./sbt publish-local
 ```
 
-(Repository will follow soon…)
+Or by adding the repo:
+<notextile><pre><code>"gideondk-repo" at "https://raw.github.com/gideondk/gideondk-mvn-repo/master"</code></pre></notextile>
+
+to your SBT configuration and adding the `SNAPSHOT` to your library dependencies:
+
+<notextile><pre><code>libraryDependencies ++= Seq(
+	"nl.spotdog" %% "bark" % "0.1"
+)
+</code></pre></notextile>
+
 
 ## Usage
 ### Server
@@ -82,7 +91,7 @@ The `|?|` function is used to enter a specific module on the server, while the `
 The current DSL isn't optimal for plain usage (and is rather verbose and fuzzy), but is designed to be used within environment where the actual usage of the `BarkClient` is abstracted on a higher level.
 
 # License
-Copyright © 2013 Gideon de Kok
+Copyright © 2013 Gideon de Kok, SpotDog
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 

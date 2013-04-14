@@ -1,8 +1,8 @@
 package nl.spotdog.bark.server
 
 import akka.actor.{ Props, ActorSystem }
-import nl.spotdog.bark.actors._
 import akka.actor.ActorRef
+
 import nl.gideondk.sentinel.server._
 
 import nl.spotdog.bark.protocol.BarkMessaging._
