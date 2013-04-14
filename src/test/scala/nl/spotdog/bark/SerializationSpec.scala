@@ -16,21 +16,6 @@ import play.api.libs.iteratee._
 case class TestClass(a: Int, b: String, d: (Int, List[Int]))
 
 class SerializationSpec extends Specification {
-  // "A Small Int" should {
-  //   "be able to be (de)serialized" in {
-  //     val a = toETF(4.toByte)
-  //     val b = toETF(-15.toByte)
-
-  //     val r1 = BarkReader[Byte]
-  //     val ra = r1(Chunk(a))._1.get
-
-  //     val r2 = BarkReader[Byte]
-  //     val rb = r2(Chunk(b))._1.get
-
-  //     ra == 4.toByte && rb == -15.toByte
-  //   }
-  // }
-
   "A Int" should {
     "be able to be (de)serialized" in {
       val a = toETF(8887)
@@ -109,25 +94,6 @@ class SerializationSpec extends Specification {
       a == ra
     }
   }
-
-  //   // // // "A Big tuple" should {
-  //   // // //   "be able to be (de)serialized" in {
-  //   // // //     val a = LargeTuple(Seq.fill(500)((1, 4)))
-
-  //   // // //     val ra = Await.result(Enumerator(toETF(a)) |>>> readLargeTuple, Duration.Inf)
-
-  //   // // //     a == ra
-  //   // // //   }
-  //   // // // }
-
-  //   // // // "A case class" should {
-  //   // // //   "be able to be (de)serialized" in {
-  //   // // //     // Silly test, easier case class serialization will be added soon...
-  //   // // //     val a = TestClass(54, "Lorem Ipsum", (5 -> List(5, 33, 21)))
-  //   // // //     val ra = Await.result(Enumerator(toETF(TestClass.unapply(a).get)) |>>> readSmallTuple, Duration.Inf)
-  //   // // //     a == TestClass.tupled(ra.asInstanceOf[(Int, String, (Int, List[Int]))])
-  //   // // //   }
-  //   // // // }
 
   "A Boolean" should {
     "be able to be (de)serialized" in {

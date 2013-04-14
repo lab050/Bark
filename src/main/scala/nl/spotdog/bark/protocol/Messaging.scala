@@ -36,19 +36,6 @@ object Request {
    *   
    */
   case class Cast[T <: Product](module: Atom, functionName: Atom, arguments: T) extends Request
-
-  /* 
-   * AsyncCall: Send a request to a server, waiting for a immediate reply and sending the response later through a callback
-   * 
-   * (`asyncreply, `persons, `collect, "collect-callback-2", ("group_ids", [1,2,3]))
-   *    
-   */
-  case class AsyncCall[T <: Product](module: Atom, functionName: Atom, callback: String, arguments: T) extends Request
-
-  //  /* 
-  //   * React: Send a request to a server, creating a remote iteratee like process. 
-  //   */
-  //  case class React[Args <: HList](module: Symbol, functionName: Symbol, arguments: Args) extends Request[Args]
 }
 
 object Response {
@@ -69,14 +56,6 @@ object Response {
   case class NoReply() extends Response
 
   /* 
-   * AsyncReply: Send back to the client with the resulting value through a callback
-   * 
-   * (`asyncreply, "sum-callback-23", (32))
-   * 
-   * */
-  case class AsyncReply(callback: String, value: ByteString) extends Response
-
-  /* 
    * Error: Send back to the client in case of an error
    * 
    * Error types: protocol, server, user, and proxy (BERT-RPC style)
@@ -84,14 +63,6 @@ object Response {
    * 
    * */
   case class Error(errorType: Atom, errorCode: Int, errorClass: String, errorDetail: String, backtrace: List[String]) extends FailedResponse
-
-  /* 
-   * Error: Send back to the client in case of an error through a callback
-   * 
-   * ('error, `server, 2, "UnknownFunction", "function 'collect' not found on module 'logs'", [""], "collect-callback-2")
-   * 
-   * */
-  case class AsyncError(errorType: Atom, errorCode: Int, errorClass: String, errorDetail: String, backtrace: List[String], callback: String) extends FailedResponse
 }
 
 object BarkMessaging extends ETFConverters with TupleConverters {
@@ -123,18 +94,6 @@ object BarkMessaging extends ETFConverters with TupleConverters {
     def readFromIterator(iter: ByteIterator): Request.Cast[T] = {
       val tpl = tuple4Converter[Atom, Atom, Atom, T].readFromIterator(iter)
       Request.Cast(tpl._2, tpl._3, tpl._4)
-    }
-  }
-
-  implicit def asyncCallConverter[T <: Product](implicit c1: ETFConverter[T]) = new ETFConverter[Request.AsyncCall[T]] {
-    def write(o: Request.AsyncCall[T]) = {
-      val callTpl = Request.AsyncCall.unapply(o).get
-      tuple5Converter[Atom, Atom, Atom, String, T].write(Atom("asynccall"), callTpl._1, callTpl._2, callTpl._3, callTpl._4)
-    }
-
-    def readFromIterator(iter: ByteIterator): Request.AsyncCall[T] = {
-      val tpl = tuple5Converter[Atom, Atom, Atom, String, T].readFromIterator(iter)
-      Request.AsyncCall(tpl._2, tpl._3, tpl._4, tpl._5)
     }
   }
 
@@ -182,42 +141,4 @@ object BarkMessaging extends ETFConverters with TupleConverters {
       Response.Error(tpl._2, tpl._3, tpl._4, tpl._5, tpl._6)
     }
   }
-
-  /* Async Response */
-
-implicit def asyncReplyConverter = new ETFConverter[Response.AsyncReply] {
-    def write(o: Response.AsyncReply) = {
-      val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
-      builder.putByte(SMALL_TUPLE)
-      builder.putByte(2.toByte)
-
-      builder ++= AtomConverter.write(Atom("asyncreply"))
-      builder ++= StringConverter.write(o.callback)
-      builder ++= o.value
-      builder.result
-    }
-
-    def readFromIterator(iter: ByteIterator): Response.AsyncReply = {
-      checkMagic(iter.getByte)
-      checkSignature(SMALL_TUPLE, iter.getByte)
-      val size = iter.getByte
-      val v1 = AtomConverter.readFromIterator(iter)
-      val callback = StringConverter.readFromIterator(iter)
-
-      Response.AsyncReply(callback, iter.toByteString)
-    }
-  }
-
-  implicit def asyncErrorConverter = new ETFConverter[Response.AsyncError] {
-    def write(o: Response.AsyncError) = {
-      tuple7Converter[Atom, Atom, Int, String, String, List[String], String].write((Atom("asyncerror"), o.errorType, o.errorCode, o.errorClass, o.errorDetail, o.backtrace, o.callback))
-    }
-
-    def readFromIterator(iter: ByteIterator): Response.AsyncError = {
-      val tpl = tuple7Converter[Atom, Atom, Int, String, String, List[String], String].readFromIterator(iter)
-      Response.AsyncError(tpl._2, tpl._3, tpl._4, tpl._5, tpl._6, tpl._7)
-    }
-  }
-
 }

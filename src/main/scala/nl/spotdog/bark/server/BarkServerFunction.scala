@@ -1,7 +1,7 @@
 package nl.spotdog.bark.server
 
 import akka.util.ByteString
-import scala.util.Try
+import scala.concurrent.Future
 
 import nl.spotdog.bark.protocol._
 import shapeless._
@@ -21,18 +21,18 @@ private object BarkServerFunction {
   implicit def barkCallFunctiontoETFFunctions(m: BarkServerCall): BarkServerFunctions[BarkServerCall :: HNil] = BarkServerFunctions(m :: HNil)
   implicit def barkCastFunctiontoETFFunctions(m: BarkServerCast): BarkServerFunctions[BarkServerCast :: HNil] = BarkServerFunctions(m :: HNil)
 
-  def call(n: Atom)(f: ByteString ⇒ Try[ByteString]) = BarkServerCall(n, f)
+  def call(n: Atom)(f: ByteString ⇒ Future[ByteString]) = BarkServerCall(n, f)
 
-  def cast(n: Atom)(f: ByteString ⇒ Try[Unit]) = BarkServerCast(n, f)
+  def cast(n: Atom)(f: ByteString ⇒ Future[Unit]) = BarkServerCast(n, f)
 }
 
 trait BarkServerFunction {
   def name: Atom
 
-  def function: ByteString ⇒ Try[_]
+  def function: ByteString ⇒ Future[_]
 }
 
-case class BarkServerCall(name: Atom, function: ByteString ⇒ Try[ByteString]) extends BarkServerFunction
+case class BarkServerCall(name: Atom, function: ByteString ⇒ Future[ByteString]) extends BarkServerFunction
 
-case class BarkServerCast(name: Atom, function: ByteString ⇒ Try[Unit]) extends BarkServerFunction
+case class BarkServerCast(name: Atom, function: ByteString ⇒ Future[Unit]) extends BarkServerFunction
 

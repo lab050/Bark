@@ -18,22 +18,22 @@ import ETF._
 
 class SimpleServerClientSpec extends Specification with BarkRouting {
   val modules = module("calc") {
-    call("add")((a: Int, b: Int) ⇒ a + b) ~
-      call("length")((s: String) ⇒ s.length)
+    call("add")((a: Int, b: Int) ⇒ Future(a + b)) ~
+      call("length")((s: String) ⇒ Future(s.length))
   } ~
     module("spatial") {
-      call("cubicalString")((a: Int, b: Int, c: Int) ⇒ (a * b * c).toString)
+      call("cubicalString")((a: Int, b: Int, c: Int) ⇒ Future((a * b * c).toString))
     } ~
     module("identity") {
-      call("list")((a: List[Int]) ⇒ a)
+      call("list")((a: List[Int]) ⇒ Future(a))
     }
 
-  val (client, server) = {
+  lazy val (client, server) = {
     val serverSystem = ActorSystem("server-system")
     val server = BarkServer(24, "CalcService")(new BarkRouter(modules))(serverSystem)
     server.run(9999)
     Thread.sleep(1000)
-    val clientSystem = ActorSystem("server-system")
+    val clientSystem = ActorSystem("client-system")
     val client = BarkClient.apply("localhost", 9999, 4, "Calc client")(clientSystem)
     (client, server)
   }

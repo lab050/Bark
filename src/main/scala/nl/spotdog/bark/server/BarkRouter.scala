@@ -59,18 +59,21 @@ class BarkRouter(modules: BarkServerModules) {
   def handleCall(module: Atom, functionName: Atom, arguments: ByteString) = for {
     module ← modules.modules.get(module).toSuccess(Response.Error(Atom("server"), 1, "ModuleError", "Unknown module", List[String]()))
     function ← module.funcs.calls.get(functionName).toSuccess(Response.Error(Atom("server"), 2, "FunctionError", "Unknown function", List[String]()))
-    res ← function.function(arguments) match {
-      case scala.util.Success(s) ⇒ Success(Future(replyConverter.write(Response.Reply(s))))
-      case scala.util.Failure(e) ⇒ Failure(Response.Error(Atom("server"), 0, "RuntimeError", e.getMessage, List[String]())) // Should extend the stacktrace into the error
-    }
+    res ← Success(function.function(arguments).map(x ⇒ replyConverter.write(Response.Reply(x))).recover {
+      case e: Exception ⇒ errorConverter.write(Response.Error(Atom("server"), 0, "RuntimeError", e.getMessage, List[String]()))
+    })
   } yield res
 
   def handleCast(module: Atom, functionName: Atom, arguments: ByteString) = for {
     module ← modules.modules.get(module).toSuccess(Response.Error(Atom("server"), 1, "ModuleError", "Unknown module", List[String]()))
     function ← module.funcs.casts.get(functionName).toSuccess(Response.Error(Atom("server"), 2, "FunctionError", "Unknown function", List[String]()))
-    res ← function.function(arguments) match {
-      case scala.util.Success(s) ⇒ Success(Future(noReplyConverter.write(Response.NoReply())))
-      case scala.util.Failure(e) ⇒ Failure(Response.Error(Atom("server"), 0, "RuntimeError", e.getMessage, List[String]())) // Should extend the stacktrace into the error
+    res ← {
+      function.function(arguments)
+      Success(Future(noReplyConverter.write(Response.NoReply()))).map {
+        _.recover {
+          case e: Exception ⇒ errorConverter.write(Response.Error(Atom("server"), 0, "RuntimeError", e.getMessage, List[String]()))
+        }
+      }
     }
   } yield res
 
@@ -81,10 +84,9 @@ class BarkRouter(modules: BarkServerModules) {
       _ ← checkHeader(iter)
       tpl ← getSizeTypeModuleAndFunction(iter)
       (size, callType, module, function) = tpl
-      payload = iter.toByteString
       res ← callType match {
-        case Atom("call") ⇒ handleCall(module, function, payload)
-        case Atom("cast") ⇒ handleCast(module, function, payload)
+        case Atom("call") ⇒ handleCall(module, function, iter.toByteString)
+        case Atom("cast") ⇒ handleCast(module, function, iter.toByteString)
       }
     } yield res
 
@@ -95,20 +97,23 @@ class BarkRouter(modules: BarkServerModules) {
   }
 }
 
+import TypeOperators._
+
 trait BarkCallBuilder {
   def name: Atom
 
-  def apply[F, R, A <: HList, P <: Product](f: F)(implicit h: FnHListerAux[F, A ⇒ R], tplr: TuplerAux[A, P],
-                                                  hl: HListerAux[P, A], reader: ETFReader[P], writer: ETFWriter[R]) =
-    BarkServerFunction.call(name)((args: ByteString) ⇒ Try(writer.write(f.hlisted(reader.read(args).hlisted))))
+  def apply[R, F, FO, A <: HList, P <: Product](f: F)(implicit h: FnHListerAux[F, FO], ev: FO <:< (A ⇒ Future[R]), tplr: TuplerAux[A, P],
+                                                      hl: HListerAux[P, A], reader: ETFReader[P], writer: ETFWriter[R]) =
+    BarkServerFunction.call(name)((args: ByteString) ⇒ f.hlisted(reader.read(args).hlisted).map(writer.write(_)))
+
 }
 
 trait BarkCastBuilder {
   def name: Atom
 
-  def apply[F, A <: HList, P <: Product](f: F)(implicit h: FnHListerAux[F, A ⇒ Unit], tplr: TuplerAux[A, P],
-                                               hl: HListerAux[P, A], reader: ETFReader[P]) =
-    BarkServerFunction.cast(name)((args: ByteString) ⇒ Try(f.hlisted(reader.read(args).hlisted)))
+  def apply[R, F, FO, A <: HList, P <: Product](f: F)(implicit h: FnHListerAux[F, FO], ev: FO <:< (A ⇒ Unit), tplr: TuplerAux[A, P],
+                                                      hl: HListerAux[P, A], reader: ETFReader[P]) =
+    BarkServerFunction.cast(name)((args: ByteString) ⇒ Future(f.hlisted(reader.read(args).hlisted)))
 }
 
 trait BarkRouting {
