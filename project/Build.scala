@@ -46,17 +46,11 @@ object ApplicationBuild extends Build {
   val appDependencies = Seq(
     "org.scalaz" %% "scalaz-core" % "7.0.0-M7" withSources(),
     "org.scalaz" %% "scalaz-effect" % "7.0.0-M7" withSources(),
-    "com.google.protobuf" % "protobuf-java" % "2.4.1" withSources(),
     "org.specs2" %% "specs2" % "1.13",
-    "io.spray" %%  "spray-json" % "1.2.3",
+
     "com.typesafe.akka" % "akka-actor_2.10" % "2.2-20130410-001403",
-
-    "com.google.protobuf" % "protobuf-java" % "2.4.1" withSources(),
-    "play" %% "play-iteratees" % "2.1-RC2" withSources(),
     "com.chuusai" %% "shapeless" % "1.2.4" withSources(),
-
     "nl.gideondk" %% "sentinel" % "0.2.1" withSources()
-
   )
 
   lazy val root = Project(id = "bark",
@@ -64,7 +58,7 @@ object ApplicationBuild extends Build {
     settings = Project.defaultSettings ++ Seq(
       libraryDependencies ++= appDependencies,
       mainClass := Some("Main")
-    ) ++ spray.boilerplate.BoilerplatePlugin.Boilerplate.settings ++ Format.settings
+    ) ++ Format.settings
   )
 }
 
