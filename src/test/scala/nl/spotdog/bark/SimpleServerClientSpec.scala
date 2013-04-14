@@ -30,11 +30,11 @@ class SimpleServerClientSpec extends Specification with BarkRouting {
 
   lazy val (client, server) = {
     val serverSystem = ActorSystem("server-system")
-    val server = BarkServer(24, "CalcService")(new BarkRouter(modules))(serverSystem)
+    val server = BarkServer(24, "CalcService")(modules)(serverSystem)
     server.run(9999)
     Thread.sleep(1000)
     val clientSystem = ActorSystem("client-system")
-    val client = BarkClient.apply("localhost", 9999, 4, "Calc client")(clientSystem)
+    val client = BarkClient("localhost", 9999, 4, "Calc client")(clientSystem)
     (client, server)
   }
 
@@ -58,20 +58,4 @@ class SimpleServerClientSpec extends Specification with BarkRouting {
 
       compA && compB && compC && compD
     }
-
-    "be able to use to the server in timely fashion" in {
-      val num = 50000
-      val mulActs = for (i ← 1 to num) yield ((client |?| "calc" |/| "add") <<? (1, 4))
-      val ioActs = mulActs.toList.map(_.run).sequence
-      val futs = ioActs.map(x ⇒ Future.sequence(x.map(_.run)))
-
-      val fut = futs.unsafePerformIO
-      BenchmarkHelpers.timed("Handling " + num + " requests", num) {
-        Await.result(fut, Duration.apply(10, scala.concurrent.duration.SECONDS))
-        true
-      }
-      val res = Await.result(fut, Duration.apply(10, scala.concurrent.duration.SECONDS))
-      res.map(_.toOption.get).filterNot(x ⇒ x.as[Int].get == 5).length == 0
-    }
-  }
 }

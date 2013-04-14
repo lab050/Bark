@@ -18,16 +18,19 @@ class BarkServer(numberOfWorkers: Int, description: String)(router: BarkRouter)(
   val stages = new LengthFieldFrame(1024 * 1024 * 50) // Max 50MB messages 
 
   def stop {
-    if (serverRef.isDefined) system stop serverRef.get
+    if (serverRef.isDefined) {
+      system stop serverRef.get
+      serverRef = None
+    }
   }
 
   def run(port: Int) = {
-    val actor = SentinelServer.randomRouting(port, numberOfWorkers, router.handle, description)(ctx, stages, true)
+    if (serverRef.isEmpty) serverRef = Some(SentinelServer.randomRouting(port, numberOfWorkers, router.handle, description)(ctx, stages, true))
   }
 }
 
 object BarkServer {
-  def apply(numberOfWorkers: Int, description: String)(router: BarkRouter)(implicit system: ActorSystem) = {
-    new BarkServer(numberOfWorkers, description)(router)
+  def apply(numberOfWorkers: Int, description: String)(modules: BarkServerModules)(implicit system: ActorSystem) = {
+    new BarkServer(numberOfWorkers, description)(new BarkRouter(modules))
   }
 }

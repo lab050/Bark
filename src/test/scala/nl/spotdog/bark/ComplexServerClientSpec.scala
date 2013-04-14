@@ -22,6 +22,7 @@ import scala.concurrent.duration._
 
 object CacheServer extends BarkRouting {
   implicit val system = ActorSystem("cache-system")
+
   case class SetCache(k: String, v: String)
   case class GetCache(k: String)
   case class CacheResult(v: Option[String])
@@ -47,19 +48,19 @@ class ComplexClientSpec extends Specification {
 
   lazy val (client, server) = {
     val serverSystem = ActorSystem("server-system")
-    val server = BarkServer(24, "cacheService")(new BarkRouter(CacheServer.modules))(serverSystem)
+    val server = BarkServer(24, "cacheService")(CacheServer.modules)(serverSystem)
     server.run(8888)
     Thread.sleep(1000)
     val clientSystem = ActorSystem("client-system")
-    val client = BarkClient.apply("localhost", 8888, 4, "Cache client")(clientSystem)
+    val client = BarkClient("localhost", 8888, 4, "Cache client")(clientSystem)
     (client, server)
   }
 
-  "A Client" should {
-    "be able to be send and receive messages to and from a server" in {
+  "A more complex client" should {
+    "be able to use both cast as call functionality in correct fashion" in {
       val res = for {
-        _ ← (client |?| "cache" |/| "set") <<! ("A", "Test Value")
-        x ← (client |?| "cache" |/| "get") <<? "A"
+        _ ← (client |?| "cache" |/| "set") <<! ("A", "Test Value") // Because the current back-end is single actor backed, we can anticipate on the fact that the cast is handled before the call
+        x ← (client |?| "cache" |/| "get") <<? "A" 
       } yield x
 
       res.map(_.as[String]).unsafeFulFill.toOption.get.get.length > 0
