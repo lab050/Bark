@@ -15,7 +15,7 @@ class BarkServer(numberOfWorkers: Int, description: String)(router: BarkRouter)(
     def byteOrder = java.nio.ByteOrder.BIG_ENDIAN
   }
 
-  val stages = new LengthFieldFrame(1024 * 1024 * 50) // Max 50MB messages 
+  val stages = new LengthFieldFrame(1024 * 1024 * 1024) // Max 1Gb messages 
 
   def stop {
     if (serverRef.isDefined) {

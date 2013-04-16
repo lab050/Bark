@@ -11,7 +11,6 @@ import scalaz._
 import Scalaz._
 import concurrent.Await
 import concurrent.duration.Duration
-import play.api.libs.iteratee._
 
 case class TestClass(a: Int, b: String, d: (Int, List[Int]))
 

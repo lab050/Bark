@@ -58,4 +58,5 @@ class SimpleServerClientSpec extends Specification with BarkRouting {
 
       compA && compB && compC && compD
     }
+  }
 }

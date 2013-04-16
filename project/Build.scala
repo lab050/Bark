@@ -5,21 +5,18 @@ import org.ensime.sbt.Plugin.Settings.ensimeConfig
 import org.ensime.sbt.util.SExp._
 
 object ApplicationBuild extends Build {
-
-  val appName = "bark"
-  val appVersion = "0.1"
-
   override lazy val settings = super.settings ++
     Seq(
       name := "bark",
-      version := "0.1",
+      version := "0.1.1",
       scalaVersion := "2.10.0",
       parallelExecution in Test := false,
       resolvers ++= Seq(Resolver.mavenLocal,
         "Sonatype OSS Releases" at "http://oss.sonatype.org/content/repositories/releases/",
         "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/",
         "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
-        "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"),
+        "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+        "gideondk-repo" at "https://raw.github.com/gideondk/gideondk-mvn-repo/master"),
       ensimeConfig := sexp(
         key(":compiler-args"), sexp("-Ywarn-dead-code", "-Ywarn-shadowing"),
         key(":formatting-prefs"), sexp(
@@ -44,13 +41,14 @@ object ApplicationBuild extends Build {
     )
 
   val appDependencies = Seq(
-    "org.scalaz" %% "scalaz-core" % "7.0.0-M7" withSources(),
-    "org.scalaz" %% "scalaz-effect" % "7.0.0-M7" withSources(),
+  "org.scalaz" %% "scalaz-core" % "7.0.0-RC1",
+    "org.scalaz" %% "scalaz-effect" % "7.0.0-RC1",
     "org.specs2" %% "specs2" % "1.13",
 
-    "com.typesafe.akka" % "akka-actor_2.10" % "2.2-20130410-001403",
-    "com.chuusai" %% "shapeless" % "1.2.4" withSources(),
-    "nl.gideondk" %% "sentinel" % "0.2.1" withSources()
+    "com.chuusai" % "shapeless_2.10.0" % "1.2.4",
+    "com.typesafe.akka" % "akka-actor_2.10" % "2.2-20130416-001427",
+
+    "nl.gideondk" %% "sentinel" % "0.2.3"
   )
 
   lazy val root = Project(id = "bark",

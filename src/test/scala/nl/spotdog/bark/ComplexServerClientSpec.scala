@@ -60,7 +60,7 @@ class ComplexClientSpec extends Specification {
     "be able to use both cast as call functionality in correct fashion" in {
       val res = for {
         _ ← (client |?| "cache" |/| "set") <<! ("A", "Test Value") // Because the current back-end is single actor backed, we can anticipate on the fact that the cast is handled before the call
-        x ← (client |?| "cache" |/| "get") <<? "A" 
+        x ← (client |?| "cache" |/| "get") <<? "A"
       } yield x
 
       res.map(_.as[String]).unsafeFulFill.toOption.get.get.length > 0
