@@ -9,6 +9,7 @@ object ApplicationBuild extends Build {
     Seq(
       name := "bark",
       version := "0.1.1",
+      organization := "nl.spotdog",
       scalaVersion := "2.10.0",
       parallelExecution in Test := false,
       resolvers ++= Seq(Resolver.mavenLocal,
