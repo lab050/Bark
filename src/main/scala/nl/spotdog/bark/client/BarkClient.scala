@@ -123,5 +123,4 @@ class BarkClient(host: String, port: Int, numberOfWorkers: Int, description: Str
 object BarkClient {
   def apply(host: String, port: Int, numberOfWorkers: Int, description: String)(implicit system: ActorSystem) =
     new BarkClient(host, port, numberOfWorkers, description)
-
 }

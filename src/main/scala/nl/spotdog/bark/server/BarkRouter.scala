@@ -113,9 +113,6 @@ trait BarkCallBuilder {
 trait BarkCastBuilder {
   def name: Atom
 
-  def apply[R](f: Function0[Future[R]])(implicit writer: ETFWriter[R]) =
-    BarkServerFunction.cast(name)((bs: ByteString) ⇒ f().map(writer.write(_)))
-
   def apply[R, F, FO, A <: HList, P <: Product](f: F)(implicit h: FnHListerAux[F, FO], ev: FO <:< (A ⇒ Unit), tplr: TuplerAux[A, P],
                                                       hl: HListerAux[P, A], reader: ETFReader[P]) =
     BarkServerFunction.cast(name)((args: ByteString) ⇒ Future(f.hlisted(reader.read(args).hlisted)))
