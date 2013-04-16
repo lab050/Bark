@@ -41,7 +41,7 @@ class BarkRouter(modules: BarkServerModules) {
 
   def getSizeTypeModuleAndFunction(iter: ByteIterator): BarkServerValidation[(Int, Atom, Atom, Atom)] = {
     val size = iter.getByte
-    if (size != 4) Failure(Response.Error(Atom("protocol"), 1, "ParseError", "Incorrect request message", List[String]()))
+    if (size < 3 || size > 4) Failure(Response.Error(Atom("protocol"), 1, "ParseError", "Incorrect request message", List[String]()))
     else {
       val tpl = for {
         callType ← Try(AtomConverter.readFromIterator(iter))
@@ -59,9 +59,10 @@ class BarkRouter(modules: BarkServerModules) {
   def handleCall(module: Atom, functionName: Atom, arguments: ByteString) = for {
     module ← modules.modules.get(module).toSuccess(Response.Error(Atom("server"), 1, "ModuleError", "Unknown module", List[String]()))
     function ← module.funcs.calls.get(functionName).toSuccess(Response.Error(Atom("server"), 2, "FunctionError", "Unknown function", List[String]()))
-    res ← Success(function.function(arguments).map(x ⇒ replyConverter.write(Response.Reply(x))).recover {
-      case e: Exception ⇒ errorConverter.write(Response.Error(Atom("server"), 0, "RuntimeError", e.getMessage, List[String]()))
-    })
+    res ← Try(function.function(arguments).map(x ⇒ replyConverter.write(Response.Reply(x)))) match {
+      case scala.util.Success(s) ⇒ Success(s)
+      case scala.util.Failure(f) ⇒ Failure(Response.Error(Atom("server"), 0, "RuntimeError", f.getMessage, List[String]()))
+    }
   } yield res
 
   def handleCast(module: Atom, functionName: Atom, arguments: ByteString) = for {
@@ -69,11 +70,7 @@ class BarkRouter(modules: BarkServerModules) {
     function ← module.funcs.casts.get(functionName).toSuccess(Response.Error(Atom("server"), 2, "FunctionError", "Unknown function", List[String]()))
     res ← {
       function.function(arguments)
-      Success(Future(noReplyConverter.write(Response.NoReply()))).map {
-        _.recover {
-          case e: Exception ⇒ errorConverter.write(Response.Error(Atom("server"), 0, "RuntimeError", e.getMessage, List[String]()))
-        }
-      }
+      Success[Response.Error, Future[ByteString]](Future(noReplyConverter.write(Response.NoReply())))
     }
   } yield res
 
@@ -91,7 +88,9 @@ class BarkRouter(modules: BarkServerModules) {
     } yield res
 
     value match {
-      case Success(s) ⇒ s
+      case Success(s) ⇒ s.recover {
+        case e: Exception ⇒ errorConverter.write(Response.Error(Atom("server"), 0, "RuntimeError", e.getMessage, List[String]()))
+      }
       case Failure(e) ⇒ Future(errorConverter.write(e))
     }
   }
@@ -102,6 +101,9 @@ import TypeOperators._
 trait BarkCallBuilder {
   def name: Atom
 
+  def apply[R](f: Function0[Future[R]])(implicit writer: ETFWriter[R]) =
+    BarkServerFunction.call(name)((bs: ByteString) ⇒ f().map(writer.write(_)))
+
   def apply[R, F, FO, A <: HList, P <: Product](f: F)(implicit h: FnHListerAux[F, FO], ev: FO <:< (A ⇒ Future[R]), tplr: TuplerAux[A, P],
                                                       hl: HListerAux[P, A], reader: ETFReader[P], writer: ETFWriter[R]) =
     BarkServerFunction.call(name)((args: ByteString) ⇒ f.hlisted(reader.read(args).hlisted).map(writer.write(_)))
@@ -110,6 +112,9 @@ trait BarkCallBuilder {
 
 trait BarkCastBuilder {
   def name: Atom
+
+  def apply[R](f: Function0[Future[R]])(implicit writer: ETFWriter[R]) =
+    BarkServerFunction.cast(name)((bs: ByteString) ⇒ f().map(writer.write(_)))
 
   def apply[R, F, FO, A <: HList, P <: Product](f: F)(implicit h: FnHListerAux[F, FO], ev: FO <:< (A ⇒ Unit), tplr: TuplerAux[A, P],
                                                       hl: HListerAux[P, A], reader: ETFReader[P]) =

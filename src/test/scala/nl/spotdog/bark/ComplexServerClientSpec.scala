@@ -63,7 +63,7 @@ class ComplexClientSpec extends Specification {
         x ← (client |?| "cache" |/| "get") <<? "A"
       } yield x
 
-      res.map(_.as[String]).unsafeFulFill.toOption.get.get.length > 0
+      res.map(_.as[String]).unsafeFulFill.toOption.get.get == "Test Value"
     }
   }
 }

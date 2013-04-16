@@ -26,6 +26,9 @@ class SimpleServerClientSpec extends Specification with BarkRouting {
     } ~
     module("identity") {
       call("list")((a: List[Int]) ⇒ Future(a))
+    } ~
+    module("generation") {
+      call("generate_5")(() ⇒ Future(5))
     }
 
   lazy val (client, server) = {
@@ -56,7 +59,11 @@ class SimpleServerClientSpec extends Specification with BarkRouting {
       val resD = reqD.map(x ⇒ x.as[List[Int]])
       val compD = resD.unsafeFulFill.toOption.get.get.corresponds(List(1, 2, 4, 5, 6, 7))(_ == _)
 
-      compA && compB && compC && compD
+      val reqE = (client |?| "generation" |/| "generate_5") <<? ()
+      val resE = reqE.map(_.as[Int])
+      val compE = resE.unsafeFulFill.toOption.get.get == 5
+
+      compA && compB && compC && compD && compE
     }
   }
 }

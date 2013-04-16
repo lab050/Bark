@@ -9,10 +9,14 @@ import nl.spotdog.bark.protocol.ETFTypes._
 
 import akka.io.PipelineContext
 
-trait Request {
+trait ArgumentLessRequest {
   def module: Atom
   def functionName: Atom
-  def arguments: Product
+}
+
+trait Request extends ArgumentLessRequest {
+  def module: Atom
+  def functionName: Atom
 }
 
 trait Response
@@ -20,6 +24,13 @@ trait Response
 trait FailedResponse extends Response
 
 object Request {
+  /* 
+   * Argument less call: Send a request to a server, waiting for a immediate (blocking) response, best used in CPU bound services. 
+   * 
+   * (`call, `generation, `generateId))
+   * 
+   */
+  case class ArgumentLessCall(module: Atom, functionName: Atom) extends ArgumentLessRequest
 
   /* 
    * Call: Send a request to a server, waiting for a immediate (blocking) response, best used in CPU bound services. 
@@ -85,6 +96,18 @@ object BarkMessaging extends ETFConverters with TupleConverters {
     }
   }
 
+  implicit def argumentLessCallConverter = new ETFConverter[Request.ArgumentLessCall] {
+    def write(o: Request.ArgumentLessCall) = {
+      val callTpl = Request.ArgumentLessCall.unapply(o).get
+      tuple3Converter[Atom, Atom, Atom].write(Atom("call"), callTpl._1, callTpl._2)
+    }
+
+    def readFromIterator(iter: ByteIterator): Request.ArgumentLessCall = {
+      val tpl = tuple3Converter[Atom, Atom, Atom].readFromIterator(iter)
+      Request.ArgumentLessCall(tpl._2, tpl._3)
+    }
+  }
+
   implicit def castConverter[T <: Product](implicit c1: ETFConverter[T]) = new ETFConverter[Request.Cast[T]] {
     def write(o: Request.Cast[T]) = {
       val callTpl = Request.Cast.unapply(o).get
@@ -116,6 +139,7 @@ object BarkMessaging extends ETFConverters with TupleConverters {
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = AtomConverter.readFromIterator(iter)
+      if (v1 != Atom("reply")) throw new Exception("Response is not of the 'reply' type")
       Response.Reply(iter.toByteString)
     }
   }
@@ -127,6 +151,7 @@ object BarkMessaging extends ETFConverters with TupleConverters {
 
     def readFromIterator(iter: ByteIterator): Response.NoReply = {
       val tpl = tuple1Converter[Atom].readFromIterator(iter)
+      if (tpl._1 != Atom("noreply")) throw new Exception("Response is not of the 'noreply' type")
       Response.NoReply()
     }
   }

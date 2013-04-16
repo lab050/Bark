@@ -43,21 +43,29 @@ case class BarkClientResult(rawResult: ByteString) {
 }
 
 class BarkClientFunction(client: BarkClient, module: String, functionName: String) {
+  private def handleResponse(bs: ByteString) = {
+    Try(replyConverter.read(bs)) match {
+      case scala.util.Success(s) ⇒ s.point[ValidatedFutureIO].map(x ⇒ BarkClientResult(x.value))
+      case scala.util.Failure(e) ⇒ {
+        val error = errorConverter.read(bs)
+        ValidatedFutureIO(Future(throw new Exception(error.errorDetail))) // TODO: handle specific errors into specific throwables
+      }
+    }
+  }
+
+  def call(): ValidatedFutureIO[BarkClientResult] = {
+    val req = Request.ArgumentLessCall(Atom(module), Atom(functionName))
+    val cmd = argumentLessCallConverter.write(req)
+    (client sendCommand cmd) flatMap handleResponse
+  }
+
   def call[T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[T]): ValidatedFutureIO[BarkClientResult] =
     call(Tuple1(args))
 
   def call[T <: Product](args: T)(implicit tW: ETFConverter[T]): ValidatedFutureIO[BarkClientResult] = {
     val req = Request.Call(Atom(module), Atom(functionName), args)
     val cmd = callConverter(tW).write(req)
-    (client sendCommand cmd).flatMap { x ⇒
-      Try(replyConverter.read(x)) match {
-        case scala.util.Success(s) ⇒ s.point[ValidatedFutureIO].map(x ⇒ BarkClientResult(x.value))
-        case scala.util.Failure(e) ⇒ {
-          val error = errorConverter.read(x)
-          ValidatedFutureIO(Future(throw new Exception(error.errorDetail))) // TODO: handle specific errors into specific throwables
-        }
-      }
-    }
+    (client sendCommand cmd) flatMap handleResponse
   }
 
   def cast[T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[T]): ValidatedFutureIO[Unit] =
@@ -67,7 +75,7 @@ class BarkClientFunction(client: BarkClient, module: String, functionName: Strin
     val req = Request.Cast(Atom(module), Atom(functionName), args)
     val cmd = castConverter(tW).write(req)
     (client sendCommand cmd).flatMap { x ⇒
-      Try(replyConverter.read(x)) match {
+      Try(noReplyConverter.read(x)) match {
         case scala.util.Success(s) ⇒ s.point[ValidatedFutureIO].map(_ ⇒ ())
         case scala.util.Failure(e) ⇒ {
           val error = errorConverter.read(x)
@@ -76,6 +84,8 @@ class BarkClientFunction(client: BarkClient, module: String, functionName: Strin
       }
     }
   }
+
+  def <<?(): ValidatedFutureIO[BarkClientResult] = call()
 
   def <<?[T <: Product](args: T)(implicit tW: ETFConverter[T]): ValidatedFutureIO[BarkClientResult] = call(args)
 
