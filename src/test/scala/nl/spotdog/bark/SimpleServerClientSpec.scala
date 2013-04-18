@@ -9,6 +9,7 @@ import scalaz._
 import Scalaz._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
 
 import nl.spotdog.bark.client._
 import nl.spotdog.bark.server._
@@ -17,6 +18,8 @@ import nl.spotdog.bark.protocol._
 import ETF._
 
 class SimpleServerClientSpec extends Specification with BarkRouting {
+  implicit val duration = Duration(10, SECONDS)
+
   val modules = module("calc") {
     call("add")((a: Int, b: Int) ⇒ Future(a + b)) ~
       call("length")((s: String) ⇒ Future(s.length))
@@ -45,23 +48,23 @@ class SimpleServerClientSpec extends Specification with BarkRouting {
     "be able to be send and receive messages to and from a server" in {
       val reqA = ((client |?| "calc" |/| "add") <<? (1, 4))
       val resA = reqA.map(x ⇒ x.as[Int])
-      val compA = resA.unsafeFulFill.toOption.get.get == 5
+      val compA = resA.run.get.get == 5
 
       val reqB = ((client |?| "calc" |/| "length") <<? "TestString")
       val resB = reqB.map(x ⇒ x.as[Int])
-      val compB = resB.unsafeFulFill.toOption.get.get == "TestString".length
+      val compB = resB.copoint.get == "TestString".length
 
       val reqC = ((client |?| "spatial" |/| "cubicalString") <<? (2, 5, 7))
       val resC = reqC.map(x ⇒ x.as[String])
-      val compC = resC.unsafeFulFill.toOption.get.get == (2 * 5 * 7).toString
+      val compC = resC.copoint.get == (2 * 5 * 7).toString
 
       val reqD = ((client |?| "identity" |/| "list") <<? Tuple1(List(1, 2, 4, 5, 6, 7)))
       val resD = reqD.map(x ⇒ x.as[List[Int]])
-      val compD = resD.unsafeFulFill.toOption.get.get.corresponds(List(1, 2, 4, 5, 6, 7))(_ == _)
+      val compD = resD.copoint.get.corresponds(List(1, 2, 4, 5, 6, 7))(_ == _)
 
       val reqE = (client |?| "generation" |/| "generate_5") <<? ()
       val resE = reqE.map(_.as[Int])
-      val compE = resE.unsafeFulFill.toOption.get.get == 5
+      val compE = resE.copoint.get == 5
 
       compA && compB && compC && compD && compE
     }

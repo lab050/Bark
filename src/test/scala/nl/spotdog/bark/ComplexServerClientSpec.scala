@@ -45,6 +45,7 @@ object CacheServer extends BarkRouting {
 }
 
 class ComplexClientSpec extends Specification {
+  implicit val duration = Duration(10, SECONDS)
 
   lazy val (client, server) = {
     val serverSystem = ActorSystem("server-system")
@@ -63,7 +64,7 @@ class ComplexClientSpec extends Specification {
         x ← (client |?| "cache" |/| "get") <<? "A"
       } yield x
 
-      res.map(_.as[String]).unsafeFulFill.toOption.get.get == "Test Value"
+      res.map(_.as[String]).copoint.get must equalTo("Test Value")
     }
   }
 }
