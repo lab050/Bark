@@ -84,9 +84,18 @@ The `<<?` and `<<!` functions can be used to call a function with the specified 
 (client |?| "cache" |/| "get") <<? "A"
 ```
 
-The `|?|` function is used to enter a specific module on the server, while the `|/|` function is used to specify the to-be-called function on the server. The actual result from the server will be wrapped within a `BarkClientResult` type, which contains the `ByteString` representation of the received frame from the server combined with the ability `as[T]` to deserialize the `ByteString` to the expected type through the type classes (passing a `Option` of the type, depending on the success of the deserialization). 
+The `|?|` function is used to enter a specific module on the server, while the `|/|` function is used to specify the to-be-called function on the server. Calling a function returns a `Task[T]`. Task has (co)monadic behavior which wraps a `Future[Try[A]]`. 
 
-***Warning***: this functionality / design will change very, very soon. Implementing the deserialization functionality within a `ValidatedFutureIO` kind of type.
+
+Use `run` to expose the `Future[Try[A]]`, or use `start(d: Duration)` to perform IO and wait (blocking) on the future.
+
+The Task returned by the BarkClient contains a `BarkClientResult` which contains the `ByteString` representation of the received frame from the server combined with the ability `as[T]` to deserialize the `ByteString` to the expected type through the type classes (passing a `Option` of the type, depending on the success of the deserialization).
+
+Importing nl.spotdog.bark.client._ results in a loaded implicit which makes it possible to directly call `.as[T]` on a Task. Wrapping the `Option` returned from `as[T]` in the Try used by the Task. This makes it possible to make the following (blocking) call which directly retuns the expected String:
+
+```scala
+callTask.as[String].copoint
+```
 
 The current DSL isn't optimal for plain usage (and is rather verbose and fuzzy), but is designed to be used within environment where the actual usage of the `BarkClient` is abstracted on a higher level.
 
