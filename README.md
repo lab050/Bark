@@ -41,7 +41,7 @@ Or by adding the repo:
 to your SBT configuration and adding the `SNAPSHOT` to your library dependencies:
 
 <notextile><pre><code>libraryDependencies ++= Seq(
-	"nl.spotdog" %% "bark" % "0.1.2"
+	"nl.spotdog" %% "bark" % "0.2.0"
 )
 </code></pre></notextile>
 
