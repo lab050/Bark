@@ -2,14 +2,12 @@ package nl.spotdog.bark.protocol
 
 import akka.util.{ ByteStringBuilder, ByteString, ByteIterator }
 import ETFTypes._
-
 import java.util.Date
-
 import scala.util.Try
-
 import shapeless._
 import HList._
 import Tuples._
+import java.util.Locale
 
 case class Atom(v: String)
 
@@ -44,7 +42,7 @@ trait ETFConverters {
 
   implicit object DoubleConverter extends ETFConverter[Double] {
     def write(o: Double) = {
-      val bytes = String.format("%15.15e", new java.lang.Double(o)).getBytes
+      val bytes = String.format(Locale.US, "%15.15e", new java.lang.Double(o)).getBytes
       val padded = bytes ++ Stream.continually(0.toByte).take(ETFTypes.FLOAT_LENGTH - bytes.length)
 
       val builder = new ByteStringBuilder
