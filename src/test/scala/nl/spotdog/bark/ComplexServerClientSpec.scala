@@ -64,7 +64,7 @@ class ComplexClientSpec extends Specification {
         x ← (client |?| "cache" |/| "get") <<? "A"
       } yield x
 
-      res.map(_.as[String]).copoint.get must equalTo("Test Value")
+      res.as[String].copoint must equalTo("Test Value")
     }
   }
 }
