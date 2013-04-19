@@ -3,19 +3,18 @@ package nl.spotdog.bark
 import org.specs2.mutable.Specification
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import akka.actor.ActorSystem
 import scalaz._
 import Scalaz._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration._
-
 import nl.spotdog.bark.client._
 import nl.spotdog.bark.server._
 import BarkServerModule._
 import nl.spotdog.bark.protocol._
 import ETF._
+import nl.gideondk.sentinel.Task
 
 class SimpleServerClientSpec extends Specification with BarkRouting {
   implicit val duration = Duration(10, SECONDS)
@@ -36,7 +35,7 @@ class SimpleServerClientSpec extends Specification with BarkRouting {
 
   lazy val (client, server) = {
     val serverSystem = ActorSystem("server-system")
-    val server = BarkServer(24, "CalcService")(modules)(serverSystem)
+    val server = BarkServer("CalcService")(modules)(serverSystem)
     server.run(9999)
     Thread.sleep(1000)
     val clientSystem = ActorSystem("client-system")

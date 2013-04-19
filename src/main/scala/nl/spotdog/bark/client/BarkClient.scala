@@ -107,7 +107,7 @@ class BarkClient(host: String, port: Int, numberOfWorkers: Int, description: Str
 
   val stages = new LengthFieldFrame(1024 * 1024 * 50) // Max 50MB messages 
 
-  val actor = SentinelClient.randomRouting(host, port, numberOfWorkers, description)(ctx, stages, true)
+  val actor = SentinelClient.randomRouting(host, port, numberOfWorkers, description)(ctx, stages)
 
   def close = {
     system stop actor

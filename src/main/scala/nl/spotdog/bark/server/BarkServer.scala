@@ -8,7 +8,7 @@ import nl.gideondk.sentinel.server._
 import nl.spotdog.bark.protocol.BarkMessaging._
 import akka.io.LengthFieldFrame
 
-class BarkServer(numberOfWorkers: Int, description: String)(router: BarkRouter)(implicit system: ActorSystem) {
+class BarkServer(description: String)(router: BarkRouter)(implicit system: ActorSystem) {
   var serverRef: Option[ActorRef] = None
 
   def ctx = new HasByteOrder {
@@ -25,12 +25,12 @@ class BarkServer(numberOfWorkers: Int, description: String)(router: BarkRouter)(
   }
 
   def run(port: Int) = {
-    if (serverRef.isEmpty) serverRef = Some(SentinelServer.randomRouting(port, numberOfWorkers, router.handle, description)(ctx, stages, true))
+    if (serverRef.isEmpty) serverRef = Some(SentinelServer(port, router.handle, description)(ctx, stages))
   }
 }
 
 object BarkServer {
-  def apply(numberOfWorkers: Int, description: String)(modules: BarkServerModules)(implicit system: ActorSystem) = {
-    new BarkServer(numberOfWorkers, description)(new BarkRouter(modules))
+  def apply(description: String)(modules: BarkServerModules)(implicit system: ActorSystem) = {
+    new BarkServer(description)(new BarkRouter(modules))
   }
 }

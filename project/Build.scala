@@ -8,7 +8,7 @@ object ApplicationBuild extends Build {
   override lazy val settings = super.settings ++
     Seq(
       name := "bark",
-      version := "0.2.0",
+      version := "0.2.1",
       organization := "nl.spotdog",
       scalaVersion := "2.10.0",
       parallelExecution in Test := false,
@@ -49,7 +49,7 @@ object ApplicationBuild extends Build {
     "com.chuusai" % "shapeless_2.10.0" % "1.2.4",
     "com.typesafe.akka" % "akka-actor_2.10" % "2.2-SNAPSHOT",
 
-    "nl.gideondk" %% "sentinel" % "0.3.0"
+    "nl.gideondk" %% "sentinel" % "0.4.0"
   )
 
   lazy val root = Project(id = "bark",
