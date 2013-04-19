@@ -91,7 +91,7 @@ Use `run` to expose the `Future[Try[A]]`, or use `start(d: Duration)` to perform
 
 The Task returned by the BarkClient contains a `BarkClientResult` which contains the `ByteString` representation of the received frame from the server combined with the ability `as[T]` to deserialize the `ByteString` to the expected type through the type classes (passing a `Option` of the type, depending on the success of the deserialization).
 
-Importing nl.spotdog.bark.client._ results in a loaded implicit which makes it possible to directly call `.as[T]` on a Task. Wrapping the `Option` returned from `as[T]` in the Try used by the Task. This makes it possible to make the following (blocking) call which directly retuns the expected String:
+Importing `nl.spotdog.bark.client._` results in a loaded implicit which makes it possible to directly call `.as[T]` on a Task. Wrapping the `Option` returned from `as[T]` in the Try used by the Task. This makes it possible to make the following (blocking) call which directly retuns the expected String:
 
 ```scala
 callTask.as[String].copoint
