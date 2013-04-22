@@ -8,7 +8,7 @@ object ApplicationBuild extends Build {
   override lazy val settings = super.settings ++
     Seq(
       name := "bark",
-      version := "0.2.1",
+      version := "0.2.2",
       organization := "nl.spotdog",
       scalaVersion := "2.10.0",
       parallelExecution in Test := false,
@@ -42,14 +42,14 @@ object ApplicationBuild extends Build {
     )
 
   val appDependencies = Seq(
-  "org.scalaz" %% "scalaz-core" % "7.0.0-RC1",
-    "org.scalaz" %% "scalaz-effect" % "7.0.0-RC1",
+  "org.scalaz" %% "scalaz-core" % "7.0.0",
+    "org.scalaz" %% "scalaz-effect" % "7.0.0",
     "org.specs2" %% "specs2" % "1.13",
 
     "com.chuusai" % "shapeless_2.10.0" % "1.2.4",
-    "com.typesafe.akka" % "akka-actor_2.10" % "2.2-SNAPSHOT",
+    "com.typesafe.akka" % "akka-actor_2.10" % "2.2-M3",
 
-    "nl.gideondk" %% "sentinel" % "0.4.0"
+    "nl.gideondk" %% "sentinel" % "0.4.1"
   )
 
   lazy val root = Project(id = "bark",
