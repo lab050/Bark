@@ -15,6 +15,8 @@ import concurrent.duration.Duration
 case class TestClass(a: Int, b: String, d: (Int, List[Int]))
 
 class SerializationSpec extends Specification {
+  sequential
+
   "A Int" should {
     "be able to be (de)serialized" in {
       val a = toETF(8887)
@@ -125,6 +127,33 @@ class SerializationSpec extends Specification {
       val ra = fromETF[Date](toETF(a)).get
 
       a == ra
+    }
+  }
+
+  "An Option[T]" should {
+    "be NIL when None" in {
+      val a: Option[Int] = None
+
+      val serializedA = toETF(a)
+      val res = fromETF[Option[Int]](serializedA).get
+
+      res must beEqualTo(a)
+    }
+    "be Some(10) when 10" in {
+      val a: Option[Int] = Some(10)
+
+      val serializedA = toETF(a)
+      val res = fromETF[Option[Int]](serializedA).get
+
+      res must beEqualTo(a)
+    }
+    "be Some(test) when is test" in {
+      val a: Option[String] = Some("test")
+
+      val serializedA = toETF(a)
+      val res = fromETF[Option[String]](serializedA).get
+
+      res must beEqualTo(a)
     }
   }
 
