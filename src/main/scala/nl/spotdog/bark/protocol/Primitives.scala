@@ -284,6 +284,17 @@ trait ExtendedETFConverters extends ETFConverters with TupleConverters {
     }
   }
 
+  implicit def SetConverter[A](implicit aConv: ETFConverter[A]) = new BarkConverter[Set[A]] {
+    def write(o: Set[A]) = {
+      tuple3Converter[Symbol, Symbol, List[A]].write(('bark, 'set, o.toList))
+    }
+
+    def readFromIterator(bi: ByteIterator) = {
+      val tl = tuple3Converter[Symbol, Symbol, List[A]].readFromIterator(bi)
+      tl._3.toSet
+    }
+  }
+
   implicit object DateConverter extends BarkConverter[Date] {
     def write(o: Date) = {
       val time = o.getTime

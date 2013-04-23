@@ -120,6 +120,18 @@ class SerializationSpec extends Specification {
     }
   }
 
+  "A Set" should {
+    "be able to be (de)serialized" in {
+      val a = Set(1, 3)
+      val b = Set("A", "B")
+
+      val ra = fromETF[Set[Int]](toETF(a)).get
+      val rb = fromETF[Set[String]](toETF(b)).get
+
+      a == ra && b == rb
+    }
+  }
+
   "A Date" should {
     "be able to be (de)serialized" in {
       val a = new Date()
