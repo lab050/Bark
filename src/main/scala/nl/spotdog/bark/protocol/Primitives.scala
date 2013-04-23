@@ -12,12 +12,15 @@ import java.util.Locale
 case class Atom(v: String)
 
 object HeaderFunctions {
-  def checkMagic(b: Byte) = b match {
-    case MAGIC ⇒ ()
-    case _     ⇒ throw new Exception("Bad Magic")
+  def checkMagic(b: Byte) = {
+    b match {
+      case MAGIC ⇒ ()
+      case _     ⇒ throw new Exception("Bad Magic")
+    }
   }
 
-  def checkSignature(expected: Byte, b: Byte) = if (b != expected) throw new Exception("Unexpected signature")
+  def checkSignature(expected: Byte, b: Byte) =
+    if (b != expected) throw new Exception("Unexpected signature")
 }
 
 trait ETFConverters {
@@ -28,13 +31,13 @@ trait ETFConverters {
   implicit object IntConverter extends ETFConverter[Int] {
     def write(o: Int) = {
       val builder = new ByteStringBuilder
-      builder.putByte(ETFTypes.MAGIC)
+
       builder.putByte(ETFTypes.INT)
       builder.putInt(o).result
     }
 
     def readFromIterator(iter: ByteIterator): Int = {
-      checkMagic(iter.getByte)
+
       checkSignature(ETFTypes.INT, iter.getByte)
       iter.getInt(byteOrder)
     }
@@ -46,7 +49,7 @@ trait ETFConverters {
       val padded = bytes ++ Stream.continually(0.toByte).take(ETFTypes.FLOAT_LENGTH - bytes.length)
 
       val builder = new ByteStringBuilder
-      builder.putByte(ETFTypes.MAGIC)
+
       builder.putByte(ETFTypes.FLOAT)
       builder.putBytes(padded)
 
@@ -54,7 +57,7 @@ trait ETFConverters {
     }
 
     def readFromIterator(iter: ByteIterator): Double = {
-      checkMagic(iter.getByte)
+
       checkSignature(ETFTypes.FLOAT, iter.getByte)
       new java.lang.Double(new String(iter.take(ETFTypes.FLOAT_LENGTH).toArray)).doubleValue
     }
@@ -63,14 +66,14 @@ trait ETFConverters {
   implicit object ByteConverter extends ETFConverter[Byte] {
     def write(o: Byte) = {
       val builder = new ByteStringBuilder
-      builder.putByte(ETFTypes.MAGIC)
+
       builder.putByte(ETFTypes.SMALL_INT)
       builder.putByte(o)
       builder.result
     }
 
     def readFromIterator(iter: ByteIterator): Byte = {
-      checkMagic(iter.getByte)
+
       checkSignature(ETFTypes.SMALL_INT, iter.getByte)
       iter.getByte
     }
@@ -83,7 +86,6 @@ trait ETFConverters {
       val length = bytes.length
 
       val builder = new ByteStringBuilder
-      builder.putByte(ETFTypes.MAGIC)
 
       if (length < 255) {
         builder.putByte(ETFTypes.SMALL_BIGNUM)
@@ -100,7 +102,7 @@ trait ETFConverters {
     }
 
     def readFromIterator(iter: ByteIterator): BigInt = {
-      checkMagic(iter.getByte)
+
       iter.getByte match {
         case SMALL_BIGNUM ⇒
           val size = iter.getByte.toInt
@@ -126,7 +128,7 @@ trait ETFConverters {
   implicit object StringConverter extends ETFConverter[String] {
     def write(o: String) = {
       val builder = new ByteStringBuilder
-      builder.putByte(ETFTypes.MAGIC)
+
       builder.putByte(ETFTypes.STRING)
       builder.putShort(o.length)
       builder.putBytes(o.getBytes)
@@ -134,13 +136,12 @@ trait ETFConverters {
     }
 
     def readFromIterator(iter: ByteIterator): String = {
-      checkMagic(iter.getByte)
+
       checkSignature(ETFTypes.STRING, iter.getByte)
       val size = iter.getShort(byteOrder)
 
       val arr = new Array[Byte](size)
       for (i ← 0 to size - 1) arr(i) = iter.next
-      Symbol(new String(arr))
       new String(arr)
     }
   }
@@ -148,7 +149,7 @@ trait ETFConverters {
   implicit object ByteArrayConverter extends ETFConverter[Array[Byte]] {
     def write(o: Array[Byte]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(ETFTypes.MAGIC)
+
       builder.putByte(ETFTypes.BIN)
       builder.putInt(o.length)
       builder.putBytes(o)
@@ -156,7 +157,7 @@ trait ETFConverters {
     }
 
     def readFromIterator(iter: ByteIterator): Array[Byte] = {
-      checkMagic(iter.getByte)
+
       checkSignature(ETFTypes.BIN, iter.getByte)
       val size = iter.getInt(byteOrder)
 
@@ -169,7 +170,7 @@ trait ETFConverters {
   implicit object AtomConverter extends ETFConverter[Atom] {
     def write(o: Atom) = {
       val builder = new ByteStringBuilder
-      builder.putByte(ETFTypes.MAGIC)
+
       builder.putByte(ETFTypes.ATOM)
       builder.putShort(o.v.length)
       builder.putBytes(o.v.getBytes)
@@ -177,7 +178,7 @@ trait ETFConverters {
     }
 
     def readFromIterator(iter: ByteIterator): Atom = {
-      checkMagic(iter.getByte)
+
       checkSignature(ETFTypes.ATOM, iter.getByte)
       val size = iter.getShort(byteOrder)
 
@@ -190,7 +191,7 @@ trait ETFConverters {
   implicit object SymbolConverter extends ETFConverter[Symbol] {
     def write(o: Symbol) = {
       val builder = new ByteStringBuilder
-      builder.putByte(ETFTypes.MAGIC)
+
       builder.putByte(ETFTypes.ATOM)
       builder.putShort(o.name.length)
       builder.putBytes(o.name.getBytes)
@@ -198,7 +199,7 @@ trait ETFConverters {
     }
 
     def readFromIterator(iter: ByteIterator): Symbol = {
-      checkMagic(iter.getByte)
+
       checkSignature(ETFTypes.ATOM, iter.getByte)
       val size = iter.getShort(byteOrder)
 
@@ -211,7 +212,7 @@ trait ETFConverters {
   implicit def ListConverter[T](implicit aConv: ETFConverter[T]) = new ETFConverter[List[T]] {
     def write(o: List[T]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(ETFTypes.MAGIC)
+
       builder.putByte(ETFTypes.LIST)
       builder.putInt(o.length)
       o.foreach {
@@ -223,7 +224,7 @@ trait ETFConverters {
     }
 
     def readFromIterator(iter: ByteIterator): List[T] = {
-      checkMagic(iter.getByte)
+
       checkSignature(ETFTypes.LIST, iter.getByte)
       val size = iter.getInt(byteOrder)
       val l = for (i ← 1 to size) yield aConv.readFromIterator(iter)
@@ -273,20 +274,19 @@ trait ExtendedETFConverters extends ETFConverters with TupleConverters {
       new java.util.Date(stamp.toLong)
     }
   }
-
-  def wrapReply(bs: ByteString) = {
-    val builder = new ByteStringBuilder
-    builder.putByte(MAGIC)
-    builder.putByte(SMALL_TUPLE)
-    builder.putByte(2)
-    builder ++= SymbolConverter.write('reply)
-    builder ++= bs
-    builder.result
-  }
 }
 
 object ETF extends ExtendedETFConverters {
-  def toETF[T](o: T)(implicit writer: ETFWriter[T]): ByteString = writer.write(o)
+  def toETF[T](o: T)(implicit writer: ETFWriter[T]): ByteString = {
+    val builder = new ByteStringBuilder
+    builder.putByte(MAGIC)
+    builder ++= writer.write(o)
+    builder.result
+  }
 
-  def fromETF[T](o: ByteString)(implicit reader: ETFReader[T]): Option[T] = Try(reader.read(o)).toOption
+  def fromETF[T](o: ByteString)(implicit reader: ETFReader[T]): Option[T] = Try {
+    val bi = o.iterator
+    HeaderFunctions.checkMagic(bi.getByte)
+    reader.readFromIterator(bi)
+  }.toOption
 }

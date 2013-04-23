@@ -17,6 +17,7 @@ import ETF._
 import nl.gideondk.sentinel.Task
 
 class SimpleServerClientSpec extends Specification with BarkRouting {
+  sequential
   implicit val duration = Duration(10, SECONDS)
 
   val modules = module("calc") {
@@ -39,7 +40,7 @@ class SimpleServerClientSpec extends Specification with BarkRouting {
     server.run(9999)
     Thread.sleep(1000)
     val clientSystem = ActorSystem("client-system")
-    val client = BarkClient("localhost", 9999, 4, "Calc client")(clientSystem)
+    val client = BarkClient("localhost", 9999, 32, "Calc client")(clientSystem)
     (client, server)
   }
 

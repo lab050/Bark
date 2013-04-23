@@ -38,16 +38,19 @@ object BarkClientConfig {
   }
 }
 
+import ETF._
+import Response._
+
 case class BarkClientResult(rawResult: ByteString) {
-  def as[T](implicit reader: ETFReader[T]) = ETF.fromETF[T](rawResult)
+  def as[T](implicit reader: ETFReader[T]) = Try(reader.read(rawResult)).toOption
 }
 
 class BarkClientFunction(client: BarkClient, module: String, functionName: String) {
   private def handleResponse(bs: ByteString) = {
-    Try(replyConverter.read(bs)) match {
+    Try(fromETF[Reply](bs).get) match {
       case scala.util.Success(s) ⇒ s.point[Task].map(x ⇒ BarkClientResult(x.value))
       case scala.util.Failure(e) ⇒ {
-        val error = errorConverter.read(bs)
+        val error = fromETF[Error](bs).get
         Task(Future(throw new Exception(error.errorDetail))) // TODO: handle specific errors into specific throwables
       }
     }
@@ -55,30 +58,30 @@ class BarkClientFunction(client: BarkClient, module: String, functionName: Strin
 
   def call(): Task[BarkClientResult] = {
     val req = Request.ArgumentLessCall(Atom(module), Atom(functionName))
-    val cmd = argumentLessCallConverter.write(req)
+    val cmd = toETF(req)
     (client sendCommand cmd) flatMap handleResponse
   }
 
-  def call[T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[T]): Task[BarkClientResult] =
+  def call[T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[Tuple1[T]]): Task[BarkClientResult] =
     call(Tuple1(args))
 
   def call[T <: Product](args: T)(implicit tW: ETFConverter[T]): Task[BarkClientResult] = {
     val req = Request.Call(Atom(module), Atom(functionName), args)
-    val cmd = callConverter(tW).write(req)
+    val cmd = toETF(req)
     (client sendCommand cmd) flatMap handleResponse
   }
 
-  def cast[T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[T]): Task[Unit] =
+  def cast[T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[Tuple1[T]]): Task[Unit] =
     cast(Tuple1(args))
 
   def cast[T <: Product](args: T)(implicit tW: ETFConverter[T]): Task[Unit] = {
     val req = Request.Cast(Atom(module), Atom(functionName), args)
-    val cmd = castConverter(tW).write(req)
+    val cmd = toETF(req)
     (client sendCommand cmd).flatMap { x ⇒
-      Try(noReplyConverter.read(x)) match {
+      Try(fromETF[NoReply](x).get) match {
         case scala.util.Success(s) ⇒ s.point[Task].map(_ ⇒ ())
         case scala.util.Failure(e) ⇒ {
-          val error = errorConverter.read(x)
+          val error = fromETF[Error](x).get
           Task(Future(throw new Exception(error.errorDetail))) // TODO: handle specific errors into specific throwables
         }
       }
@@ -89,11 +92,11 @@ class BarkClientFunction(client: BarkClient, module: String, functionName: Strin
 
   def <<?[T <: Product](args: T)(implicit tW: ETFConverter[T]): Task[BarkClientResult] = call(args)
 
-  def <<?[T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[T]): Task[BarkClientResult] = call(args)
+  def <<?[T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[Tuple1[T]]): Task[BarkClientResult] = call(args)
 
   def <<![T <: Product](args: T)(implicit tW: ETFConverter[T]): Task[Unit] = cast(args)
 
-  def <<![T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[T]): Task[Unit] = cast(args)
+  def <<![T](args: T)(implicit nst: T <:!< Product, tW: ETFConverter[Tuple1[T]]): Task[Unit] = cast(args)
 }
 
 class BarkClientModule(client: BarkClient, name: String) {

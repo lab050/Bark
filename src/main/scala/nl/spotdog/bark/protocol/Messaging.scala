@@ -70,7 +70,7 @@ object Response {
    * Error: Send back to the client in case of an error
    * 
    * Error types: protocol, server, user, and proxy (BERT-RPC style)
-   * ('error, `server, 2, "UnknownFunction", "function 'collect' not found on module 'logs'", [""])
+   * ('error, (`server, 2, "UnknownFunction", "function 'collect' not found on module 'logs'", [""]))
    * 
    * */
   case class Error(errorType: Atom, errorCode: Int, errorClass: String, errorDetail: String, backtrace: List[String]) extends FailedResponse
@@ -125,7 +125,6 @@ object BarkMessaging extends ETFConverters with TupleConverters {
   implicit def replyConverter = new ETFConverter[Response.Reply] {
     def write(o: Response.Reply) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
       builder.putByte(SMALL_TUPLE)
       builder.putByte(2.toByte)
 
@@ -135,7 +134,6 @@ object BarkMessaging extends ETFConverters with TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator): Response.Reply = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = AtomConverter.readFromIterator(iter)
@@ -158,12 +156,12 @@ object BarkMessaging extends ETFConverters with TupleConverters {
 
   implicit def errorConverter = new ETFConverter[Response.Error] {
     def write(o: Response.Error) = {
-      tuple6Converter[Atom, Atom, Int, String, String, List[String]].write((Atom("error"), o.errorType, o.errorCode, o.errorClass, o.errorDetail, o.backtrace))
+      tuple2Converter[Atom, Tuple5[Atom, Int, String, String, List[String]]].write((Atom("error"), (o.errorType, o.errorCode, o.errorClass, o.errorDetail, o.backtrace)))
     }
 
     def readFromIterator(iter: ByteIterator): Response.Error = {
-      val tpl = tuple6Converter[Atom, Atom, Int, String, String, List[String]].readFromIterator(iter)
-      Response.Error(tpl._2, tpl._3, tpl._4, tpl._5, tpl._6)
+      val tpl = tuple2Converter[Atom, (Atom, Int, String, String, List[String])].readFromIterator(iter)
+      Response.Error(tpl._2._1, tpl._2._2, tpl._2._3, tpl._2._4, tpl._2._5)
     }
   }
 }

@@ -10,7 +10,7 @@ trait TupleConverters {
   implicit def tuple1Converter[T1](implicit c1: ETFConverter[T1]) = new ETFConverter[Tuple1[T1]] {
     def write(o: Tuple1[T1]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -19,7 +19,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -30,7 +29,7 @@ trait TupleConverters {
   implicit def tuple2Converter[T1, T2](implicit c1: ETFConverter[T1], c2: ETFConverter[T2]) = new ETFConverter[Tuple2[T1, T2]] {
     def write(o: Tuple2[T1, T2]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -40,7 +39,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -52,7 +50,7 @@ trait TupleConverters {
   implicit def tuple3Converter[T1, T2, T3](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3]) = new ETFConverter[Tuple3[T1, T2, T3]] {
     def write(o: Tuple3[T1, T2, T3]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -63,7 +61,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -76,7 +73,7 @@ trait TupleConverters {
   implicit def tuple4Converter[T1, T2, T3, T4](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4]) = new ETFConverter[Tuple4[T1, T2, T3, T4]] {
     def write(o: Tuple4[T1, T2, T3, T4]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -88,7 +85,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -102,7 +98,6 @@ trait TupleConverters {
   implicit def tuple5Converter[T1, T2, T3, T4, T5](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5]) = new ETFConverter[Tuple5[T1, T2, T3, T4, T5]] {
     def write(o: Tuple5[T1, T2, T3, T4, T5]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -115,7 +110,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -130,7 +124,6 @@ trait TupleConverters {
   implicit def tuple6Converter[T1, T2, T3, T4, T5, T6](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6]) = new ETFConverter[Tuple6[T1, T2, T3, T4, T5, T6]] {
     def write(o: Tuple6[T1, T2, T3, T4, T5, T6]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -144,7 +137,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -160,7 +152,7 @@ trait TupleConverters {
   implicit def tuple7Converter[T1, T2, T3, T4, T5, T6, T7](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7]) = new ETFConverter[Tuple7[T1, T2, T3, T4, T5, T6, T7]] {
     def write(o: Tuple7[T1, T2, T3, T4, T5, T6, T7]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -175,7 +167,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -192,7 +183,7 @@ trait TupleConverters {
   implicit def tuple8Converter[T1, T2, T3, T4, T5, T6, T7, T8](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8]) = new ETFConverter[Tuple8[T1, T2, T3, T4, T5, T6, T7, T8]] {
     def write(o: Tuple8[T1, T2, T3, T4, T5, T6, T7, T8]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -208,7 +199,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -226,7 +216,7 @@ trait TupleConverters {
   implicit def tuple9Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9]) = new ETFConverter[Tuple9[T1, T2, T3, T4, T5, T6, T7, T8, T9]] {
     def write(o: Tuple9[T1, T2, T3, T4, T5, T6, T7, T8, T9]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -243,7 +233,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -262,7 +251,7 @@ trait TupleConverters {
   implicit def tuple10Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10]) = new ETFConverter[Tuple10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]] {
     def write(o: Tuple10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -280,7 +269,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -300,7 +288,7 @@ trait TupleConverters {
   implicit def tuple11Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11]) = new ETFConverter[Tuple11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]] {
     def write(o: Tuple11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -319,7 +307,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -340,7 +327,7 @@ trait TupleConverters {
   implicit def tuple12Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11], c12: ETFConverter[T12]) = new ETFConverter[Tuple12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]] {
     def write(o: Tuple12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -360,7 +347,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -382,7 +368,7 @@ trait TupleConverters {
   implicit def tuple13Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11], c12: ETFConverter[T12], c13: ETFConverter[T13]) = new ETFConverter[Tuple13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]] {
     def write(o: Tuple13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -403,7 +389,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -426,7 +411,7 @@ trait TupleConverters {
   implicit def tuple14Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11], c12: ETFConverter[T12], c13: ETFConverter[T13], c14: ETFConverter[T14]) = new ETFConverter[Tuple14[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]] {
     def write(o: Tuple14[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -448,7 +433,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -472,7 +456,7 @@ trait TupleConverters {
   implicit def tuple15Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11], c12: ETFConverter[T12], c13: ETFConverter[T13], c14: ETFConverter[T14], c15: ETFConverter[T15]) = new ETFConverter[Tuple15[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]] {
     def write(o: Tuple15[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -495,7 +479,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -520,7 +503,7 @@ trait TupleConverters {
   implicit def tuple16Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11], c12: ETFConverter[T12], c13: ETFConverter[T13], c14: ETFConverter[T14], c15: ETFConverter[T15], c16: ETFConverter[T16]) = new ETFConverter[Tuple16[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]] {
     def write(o: Tuple16[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -544,7 +527,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -570,7 +552,7 @@ trait TupleConverters {
   implicit def tuple17Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11], c12: ETFConverter[T12], c13: ETFConverter[T13], c14: ETFConverter[T14], c15: ETFConverter[T15], c16: ETFConverter[T16], c17: ETFConverter[T17]) = new ETFConverter[Tuple17[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]] {
     def write(o: Tuple17[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -595,7 +577,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -622,7 +603,7 @@ trait TupleConverters {
   implicit def tuple18Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11], c12: ETFConverter[T12], c13: ETFConverter[T13], c14: ETFConverter[T14], c15: ETFConverter[T15], c16: ETFConverter[T16], c17: ETFConverter[T17], c18: ETFConverter[T18]) = new ETFConverter[Tuple18[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]] {
     def write(o: Tuple18[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -648,7 +629,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -676,7 +656,7 @@ trait TupleConverters {
   implicit def tuple19Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11], c12: ETFConverter[T12], c13: ETFConverter[T13], c14: ETFConverter[T14], c15: ETFConverter[T15], c16: ETFConverter[T16], c17: ETFConverter[T17], c18: ETFConverter[T18], c19: ETFConverter[T19]) = new ETFConverter[Tuple19[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]] {
     def write(o: Tuple19[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -703,7 +683,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -732,7 +711,7 @@ trait TupleConverters {
   implicit def tuple20Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11], c12: ETFConverter[T12], c13: ETFConverter[T13], c14: ETFConverter[T14], c15: ETFConverter[T15], c16: ETFConverter[T16], c17: ETFConverter[T17], c18: ETFConverter[T18], c19: ETFConverter[T19], c20: ETFConverter[T20]) = new ETFConverter[Tuple20[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]] {
     def write(o: Tuple20[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -760,7 +739,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -790,7 +768,7 @@ trait TupleConverters {
   implicit def tuple21Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11], c12: ETFConverter[T12], c13: ETFConverter[T13], c14: ETFConverter[T14], c15: ETFConverter[T15], c16: ETFConverter[T16], c17: ETFConverter[T17], c18: ETFConverter[T18], c19: ETFConverter[T19], c20: ETFConverter[T20], c21: ETFConverter[T21]) = new ETFConverter[Tuple21[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21]] {
     def write(o: Tuple21[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -819,7 +797,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)
@@ -850,7 +827,7 @@ trait TupleConverters {
   implicit def tuple22Converter[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22](implicit c1: ETFConverter[T1], c2: ETFConverter[T2], c3: ETFConverter[T3], c4: ETFConverter[T4], c5: ETFConverter[T5], c6: ETFConverter[T6], c7: ETFConverter[T7], c8: ETFConverter[T8], c9: ETFConverter[T9], c10: ETFConverter[T10], c11: ETFConverter[T11], c12: ETFConverter[T12], c13: ETFConverter[T13], c14: ETFConverter[T14], c15: ETFConverter[T15], c16: ETFConverter[T16], c17: ETFConverter[T17], c18: ETFConverter[T18], c19: ETFConverter[T19], c20: ETFConverter[T20], c21: ETFConverter[T21], c22: ETFConverter[T22]) = new ETFConverter[Tuple22[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22]] {
     def write(o: Tuple22[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22]) = {
       val builder = new ByteStringBuilder
-      builder.putByte(MAGIC)
+
       builder.putByte(SMALL_TUPLE)
       builder.putByte(o.productArity.toByte)
 
@@ -880,7 +857,6 @@ trait TupleConverters {
     }
 
     def readFromIterator(iter: ByteIterator) = {
-      checkMagic(iter.getByte)
       checkSignature(SMALL_TUPLE, iter.getByte)
       val size = iter.getByte
       val v1 = c1.readFromIterator(iter)

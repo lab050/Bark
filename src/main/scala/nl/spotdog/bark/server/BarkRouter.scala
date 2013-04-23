@@ -59,7 +59,7 @@ class BarkRouter(modules: BarkServerModules) {
   def handleCall(module: Atom, functionName: Atom, arguments: ByteString) = for {
     module ← modules.modules.get(module).toSuccess(Response.Error(Atom("server"), 1, "ModuleError", "Unknown module", List[String]()))
     function ← module.funcs.calls.get(functionName).toSuccess(Response.Error(Atom("server"), 2, "FunctionError", "Unknown function", List[String]()))
-    res ← Try(function.function(arguments).map(x ⇒ replyConverter.write(Response.Reply(x)))) match {
+    res ← Try(function.function(arguments).map(x ⇒ toETF[Response.Reply](Response.Reply(x)))) match {
       case scala.util.Success(s) ⇒ Success(s)
       case scala.util.Failure(f) ⇒ Failure(Response.Error(Atom("server"), 0, "RuntimeError", f.getMessage, List[String]()))
     }
@@ -70,7 +70,7 @@ class BarkRouter(modules: BarkServerModules) {
     function ← module.funcs.casts.get(functionName).toSuccess(Response.Error(Atom("server"), 2, "FunctionError", "Unknown function", List[String]()))
     res ← {
       function.function(arguments)
-      Success[Response.Error, Future[ByteString]](Future(noReplyConverter.write(Response.NoReply())))
+      Success[Response.Error, Future[ByteString]](Future(toETF[Response.NoReply](Response.NoReply())))
     }
   } yield res
 
@@ -89,9 +89,9 @@ class BarkRouter(modules: BarkServerModules) {
 
     value match {
       case Success(s) ⇒ s.recover {
-        case e: Exception ⇒ errorConverter.write(Response.Error(Atom("server"), 0, "RuntimeError", e.getMessage, List[String]()))
+        case e: Exception ⇒ toETF[Response.Error](Response.Error(Atom("server"), 0, "RuntimeError", e.getMessage, List[String]()))
       }
-      case Failure(e) ⇒ Future(errorConverter.write(e))
+      case Failure(e) ⇒ Future(toETF[Response.Error](e))
     }
   }
 }
