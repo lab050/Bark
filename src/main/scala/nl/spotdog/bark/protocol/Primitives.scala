@@ -20,7 +20,9 @@ object HeaderFunctions {
   }
 
   def checkSignature(expected: Byte, b: Byte) =
-    if (b != expected) throw new Exception("Unexpected signature")
+    if (b != expected) {
+      throw new Exception("Unexpected signature: '" + (b & 0xFF) + "', expected: " + (expected & 0xFF))
+    }
 }
 
 trait ETFConverters {
