@@ -232,6 +232,28 @@ trait ETFConverters {
       l.toList
     }
   }
+
+  implicit def OptionTConverter[T](implicit aConv: ETFConverter[T]) = new ETFConverter[Option[T]] {
+    def write(o: Option[T]) = {
+      o match {
+        case None ⇒
+          val builder = new ByteStringBuilder
+          builder.putByte(ETFTypes.NIL)
+          builder.result
+        case Some(x) ⇒
+          aConv.write(x)
+      }
+    }
+
+    def readFromIterator(iter: ByteIterator): Option[T] = {
+      if (iter.head == ETFTypes.NIL) {
+        iter.next
+        None: Option[T]
+      } else {
+        Some(aConv.readFromIterator(iter))
+      }
+    }
+  }
 }
 
 trait ExtendedETFConverters extends ETFConverters with TupleConverters {
@@ -259,6 +281,17 @@ trait ExtendedETFConverters extends ETFConverters with TupleConverters {
     def readFromIterator(bi: ByteIterator) = {
       val tl = tuple3Converter[Symbol, Symbol, List[Tuple2[A, B]]].readFromIterator(bi)
       tl._3.toMap
+    }
+  }
+
+  implicit def SetConverter[A](implicit aConv: ETFConverter[A]) = new BarkConverter[Set[A]] {
+    def write(o: Set[A]) = {
+      tuple3Converter[Symbol, Symbol, List[A]].write(('bark, 'set, o.toList))
+    }
+
+    def readFromIterator(bi: ByteIterator) = {
+      val tl = tuple3Converter[Symbol, Symbol, List[A]].readFromIterator(bi)
+      tl._3.toSet
     }
   }
 
