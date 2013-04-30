@@ -63,10 +63,10 @@ Within each module, it's possible to create both `cast` as `call` methods, which
 
 Within a module, the `~` function can be used on a single function, to add a other function the the module. The same function can be used to implement multiple modules within the service.
 
-After the creation of the modules, the server can be initialised by passing the module to a BarkServer together with the number of workers and the name of the service:
+After the creation of the modules, the server can be initialised by passing the module to a BarkServer in combination with the name of the service:
 
 ```scala
-val server = BarkServer(24, "Cache Service")(CacheServer.modules)(serverSystem)
+val server = BarkServer("Cache Service")(CacheServer.modules)(serverSystem)
 ```
 
 After initialisation, the server can be be started by using the `run(port: Int)` command.
