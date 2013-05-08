@@ -132,19 +132,18 @@ trait ETFConverters {
       val builder = new ByteStringBuilder
 
       builder.putByte(ETFTypes.STRING)
-      builder.putShort(o.length)
-      builder.putBytes(o.getBytes)
+      builder.putShort(o.getBytes("UTF-8").length)
+      builder.putBytes(o.getBytes("UTF-8"))
       builder.result
     }
 
     def readFromIterator(iter: ByteIterator): String = {
-
       checkSignature(ETFTypes.STRING, iter.getByte)
       val size = iter.getShort(byteOrder)
 
       val arr = new Array[Byte](size)
       for (i ← 0 to size - 1) arr(i) = iter.next
-      new String(arr)
+      new String(arr, "UTF-8")
     }
   }
 
