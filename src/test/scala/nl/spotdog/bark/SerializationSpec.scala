@@ -65,6 +65,13 @@ class SerializationSpec extends Specification {
 
       a == ra
     }
+    "be able to handle unicode characters" in {
+      val a = "ëå"
+
+      val ra = fromETF[String](toETF(a)).get
+
+      a == ra
+    }
   }
 
   "A Symbol" should {
