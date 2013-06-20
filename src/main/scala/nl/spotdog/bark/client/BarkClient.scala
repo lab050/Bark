@@ -104,19 +104,15 @@ class BarkClientModule(client: BarkClient, name: String) {
 }
 
 class BarkClient(host: String, port: Int, numberOfWorkers: Int, description: String)(implicit system: ActorSystem) {
-  def ctx = new HasByteOrder {
-    def byteOrder = java.nio.ByteOrder.BIG_ENDIAN
-  }
-
   val stages = new LengthFieldFrame(1024 * 1024 * 50) // Max 50MB messages 
 
-  val actor = SentinelClient.randomRouting(host, port, numberOfWorkers, description)(ctx, stages)
+  val client = SentinelClient.randomRouting(host, port, numberOfWorkers, description)(stages)
 
   def close = {
-    system stop actor
+    system stop client.actor
   }
 
-  def sendCommand(cmd: ByteString) = actor <~< cmd
+  def sendCommand(cmd: ByteString) = client <~< cmd
 
   def module(moduleName: String) = new BarkClientModule(this, moduleName)
 

@@ -8,16 +8,16 @@ object ApplicationBuild extends Build {
   override lazy val settings = super.settings ++
     Seq(
       name := "bark",
-      version := "0.2.6",
+      version := "0.2.7",
       organization := "nl.spotdog",
-      scalaVersion := "2.10.0",
+      scalaVersion := "2.10.2",
       parallelExecution in Test := false,
       resolvers ++= Seq(Resolver.mavenLocal,
+        "gideondk-repo" at "https://raw.github.com/gideondk/gideondk-mvn-repo/master",
         "Sonatype OSS Releases" at "http://oss.sonatype.org/content/repositories/releases/",
         "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/",
         "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
-        "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
-        "gideondk-repo" at "https://raw.github.com/gideondk/gideondk-mvn-repo/master"),
+        "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"),
       ensimeConfig := sexp(
         key(":compiler-args"), sexp("-Ywarn-dead-code", "-Ywarn-shadowing"),
         key(":formatting-prefs"), sexp(
@@ -46,10 +46,11 @@ object ApplicationBuild extends Build {
     "org.scalaz" %% "scalaz-effect" % "7.0.0",
     "org.specs2" %% "specs2" % "1.13",
 
-    "com.chuusai" % "shapeless_2.10.0" % "1.2.4",
-    "com.typesafe.akka" % "akka-actor_2.10" % "2.2-M3",
+    "com.chuusai" % "shapeless_2.10.2" % "2.0.0-SNAPSHOT",
 
-    "nl.gideondk" %% "sentinel" % "0.4.1"
+    "com.typesafe.play" %% "play-iteratees" % "2.2-akka22-SNAPSHOT",
+
+    "nl.gideondk" %% "sentinel" % "0.5.2"
   )
 
   lazy val root = Project(id = "bark",

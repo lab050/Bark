@@ -25,7 +25,7 @@ class BarkServer(description: String)(router: BarkRouter)(implicit system: Actor
   }
 
   def run(port: Int) = {
-    if (serverRef.isEmpty) serverRef = Some(SentinelServer(port, router.handle, description)(ctx, stages))
+    if (serverRef.isEmpty) serverRef = Some(SentinelServer.async(port, router.handle, description)(stages))
   }
 }
 

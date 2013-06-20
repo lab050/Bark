@@ -1,28 +1,23 @@
 package nl.spotdog.bark.server
 
 import akka.actor.{ Props, ActorSystem }
-
 import nl.spotdog.bark.protocol._
 import BarkMessaging._
-
 import akka.util._
-
 import akka.actor.ActorRef
-
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import scalaz._
 import Scalaz._
-
 import nl.spotdog.bark.protocol._
 import ETF._
-
 import scala.util.Try
-
 import shapeless._
 import Functions._
 import Tuples._
+
+import TypeOperators._
+import nl.gideondk.sentinel.Task
 
 class BarkRouter(modules: BarkServerModules) {
   import ETF._
@@ -96,8 +91,6 @@ class BarkRouter(modules: BarkServerModules) {
   }
 }
 
-import TypeOperators._
-
 trait BarkCallBuilder {
   def name: Atom
 
@@ -106,7 +99,7 @@ trait BarkCallBuilder {
 
   def apply[R, F, FO, A <: HList, P <: Product](f: F)(implicit h: FnHListerAux[F, FO], ev: FO <:< (A ⇒ Future[R]), tplr: TuplerAux[A, P],
                                                       hl: HListerAux[P, A], reader: ETFReader[P], writer: ETFWriter[R]) =
-    BarkServerFunction.call(name)((args: ByteString) ⇒ f.hlisted(reader.read(args).hlisted).map(writer.write(_)))
+    BarkServerFunction.call(name)((args: ByteString) ⇒ h.apply(f)(reader.read(args).hlisted).map(writer.write(_)))
 
 }
 
@@ -115,7 +108,7 @@ trait BarkCastBuilder {
 
   def apply[R, F, FO, A <: HList, P <: Product](f: F)(implicit h: FnHListerAux[F, FO], ev: FO <:< (A ⇒ Unit), tplr: TuplerAux[A, P],
                                                       hl: HListerAux[P, A], reader: ETFReader[P]) =
-    BarkServerFunction.cast(name)((args: ByteString) ⇒ Future(f.hlisted(reader.read(args).hlisted)))
+    BarkServerFunction.cast(name)((args: ByteString) ⇒ Future(h.apply(f)(reader.read(args).hlisted)))
 }
 
 trait BarkRouting {
