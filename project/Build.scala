@@ -8,7 +8,7 @@ object ApplicationBuild extends Build {
   override lazy val settings = super.settings ++
     Seq(
       name := "bark",
-      version := "0.2.7",
+      version := "0.2.8",
       organization := "nl.spotdog",
       scalaVersion := "2.10.2",
       parallelExecution in Test := false,
