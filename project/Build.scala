@@ -50,7 +50,7 @@ object ApplicationBuild extends Build {
 
     "com.typesafe.play" %% "play-iteratees" % "2.2-akka22-SNAPSHOT",
 
-    "nl.gideondk" %% "sentinel" % "0.5.2"
+    "nl.gideondk" %% "sentinel" % "0.5.3"
   )
 
   lazy val root = Project(id = "bark",
